@@ -20,3 +20,9 @@ Start here for governance and coordination:
 - [TRINITY_INSTALL_CATALOG.md](TRINITY_INSTALL_CATALOG.md) — repo and transcript status by evidence.
 - [TRINITY_REQUIRED_PIECES.md](TRINITY_REQUIRED_PIECES.md) — checklist placeholder for required components.
 - [TRINITY_GAPS_NEXT_ACTIONS.md](TRINITY_GAPS_NEXT_ACTIONS.md) — missing evidence and next documentation steps.
+
+## How uploads work
+Uploads are drop-only: place `.zip` files in `INBOX_UPLOADS/` via **Add file → Upload files**, commit, then let automation unpack, update docs, and open a PR. Check the latest **Ingest Vercel ZIP exports** run in the **Actions** tab and review the PR for extracted files and refreshed audit docs.
+
+- [UPLOAD_CONTRACT.md](UPLOAD_CONTRACT.md) — plain-language rules and what happens automatically.
+- [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) — step-by-step checks for upload, automation, verification, and merge.
