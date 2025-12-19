@@ -14,3 +14,9 @@ Start here for governance and coordination:
 - [STATE.md](STATE.md) — current snapshot of repositories and classifications.
 - [PATCHES.md](PATCHES.md) — prioritized patch queue with owners and definitions of done.
 - [RUNBOOK.md](RUNBOOK.md) — step-by-step workflow for agents and maintainers.
+
+## Trinity / 3DT audit (status only)
+- [CRAB_LEGS_INDEX.md](CRAB_LEGS_INDEX.md) — Vercel transcript index; currently waiting on exports.
+- [TRINITY_INSTALL_CATALOG.md](TRINITY_INSTALL_CATALOG.md) — repo and transcript status by evidence.
+- [TRINITY_REQUIRED_PIECES.md](TRINITY_REQUIRED_PIECES.md) — checklist placeholder for required components.
+- [TRINITY_GAPS_NEXT_ACTIONS.md](TRINITY_GAPS_NEXT_ACTIONS.md) — missing evidence and next documentation steps.
