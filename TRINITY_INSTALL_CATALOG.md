@@ -25,3 +25,19 @@ ronmentRenderer) returned no code or configuration matches in the CODEX reposito
 
 `TRINITY_REQUIRED_PIECES.md` remains a placeholder. All required pieces are UNKNOWN until the checklist is authored and evidence
 is provided.
+## A) By Repo
+
+| Repo | Status | Evidence |
+| --- | --- | --- |
+| CODEX | 🔴 Missing | Repository scan found no Trinity/3DT indicators or required pieces. |
+| Other WIRED CHAOS repos (not in workspace) | ❓ UNKNOWN | Repositories not accessible from this workspace; no files available to scan. |
+
+## B) By CRAB Leg (Transcript)
+
+| Transcript | Status | Evidence |
+| --- | --- | --- |
+| VERCEL transcripts | ❓ UNKNOWN | `VERCEL_HISTORY/` directory not present; no transcripts to review. |
+
+## Required Pieces Status
+
+No required-piece checklist is defined in `TRINITY_REQUIRED_PIECES.md` yet. All checklist items remain UNKNOWN until that file is populated and evidence is available.
