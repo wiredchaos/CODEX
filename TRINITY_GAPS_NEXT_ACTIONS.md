@@ -20,3 +20,16 @@ hen regenerate the CRAB legs index.
 sistently.
 3. Re-scan the CODEX repository for Trinity/3DT indicators once evidence exists and update `TRINITY_INSTALL_CATALOG.md` with conf
 irmed statuses and checklist results.
+- Vercel chat/build transcripts (`VERCEL_HISTORY/` directory is absent).
+- Any repository files containing Trinity/3DT indicators.
+- Defined checklist of required pieces for Trinity installation.
+
+## Evidence Needed
+- Exported transcript files placed under `VERCEL_HISTORY/` (any format) to enable CRAB leg indexing.
+- File paths within accessible repos showing Trinity/3DT keywords (e.g., `3DT`, `TRINITY`, `WebGPU-3DT`, `EnvironmentRenderer`, `patchId="CLEAR"`).
+- A populated `TRINITY_REQUIRED_PIECES.md` detailing the required components to verify installs.
+
+## Next 3 Documentation-Only Actions
+1. Export Vercel chat/build transcripts and add them to `VERCEL_HISTORY/`, then re-run the CRAB leg index.
+2. Provide or author the official Trinity required pieces checklist in `TRINITY_REQUIRED_PIECES.md` so each repo/leg can be audited consistently.
+3. Re-scan accessible repositories for the Trinity/3DT keywords once evidence is available and update `TRINITY_INSTALL_CATALOG.md` with confirmed statuses.
