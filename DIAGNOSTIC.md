@@ -1,17 +1,21 @@
 # Repository Diagnostic: Wired Chaos
 
 ## Overview
-- Repository appears to be a freshly initialized project with minimal content.
-- Only tracked file at repository root is `README.md`.
+- Repository currently contains only root-level documentation; source code and configuration files have not yet been added.
+- Intended to serve as the baseline for the Wired Chaos workflow and codex documentation.
 
-## Inventory
-- File listing (excluding `.git`):
-  - `README.md`
+## Repository Structure
+```
+/                     # Root of repository
+├─ README.md          # High-level repository label
+└─ DIAGNOSTIC.md      # Current diagnostic and structure notes
+```
 
 ## Git Status
 - Current branch: `work`.
-- Working tree is clean with no uncommitted changes detected during this diagnostic.
+- Working tree is clean with no uncommitted changes.
 
-## Notes
-- No additional project files, configuration, or dependency manifests are present yet.
-- Next steps likely include adding project source files, configuration, and documentation to define repository purpose and usage.
+## Notes and Recommendations
+- Establish project purpose and usage guidance in `README.md` once requirements are defined.
+- Add source directories (e.g., `src/`, `docs/`, `scripts/`) and configuration manifests as the project evolves.
+- Consider initializing tooling (version control workflow, formatting, linting) when code is introduced.
