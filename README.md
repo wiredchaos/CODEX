@@ -21,6 +21,12 @@ Start here for governance and coordination:
 - [TRINITY_REQUIRED_PIECES.md](TRINITY_REQUIRED_PIECES.md) — checklist placeholder for required components.
 - [TRINITY_GAPS_NEXT_ACTIONS.md](TRINITY_GAPS_NEXT_ACTIONS.md) — missing evidence and next documentation steps.
 
+## 3DT Consumer Model
+All projects ending in `-3DT` are consumers of the Wired Chaos platform. They rely on the platform runtime, registry, permissions, and environment; they do not replace or fork those systems. See:
+- [TRINITY_CONSUMERS.md](TRINITY_CONSUMERS.md) for the formal definition and boundaries.
+- [3DT_CONSUMER_CONTRACT.md](3DT_CONSUMER_CONTRACT.md) for the plain-language contract every `-3DT` project inherits.
+
+
 ## How uploads work
 Uploads are drop-only: place `.zip` files in `INBOX_UPLOADS/` via **Add file → Upload files**, commit, then let automation unpack, update docs, and open a PR. Check the latest **Ingest Vercel ZIP exports** run in the **Actions** tab and review the PR for extracted files and refreshed audit docs.
 
