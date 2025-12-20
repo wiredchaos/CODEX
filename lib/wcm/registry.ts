@@ -1,3 +1,4 @@
+import { evaluatePortalTransition, PortalContext } from "../vault/routing";
 import { PathwayEdge, WcmNode, WCMode } from "./types";
 
 const DEFAULT_UNIVERSE = "core";
@@ -15,6 +16,7 @@ export function registerWcmNodes(): WcmNode[] {
       pathways: ["common"],
       kind: "HUB",
       hubRole: "NEUTRAL",
+      vaultSide: "NEUTRAL",
     },
     {
       id: "npc-prompt-command",
@@ -27,6 +29,7 @@ export function registerWcmNodes(): WcmNode[] {
       pathways: ["common"],
       kind: "SERVICE",
       hubRole: "NEUTRAL",
+      vaultSide: "NEUTRAL",
     },
     {
       id: "mall-entry",
@@ -39,6 +42,7 @@ export function registerWcmNodes(): WcmNode[] {
       pathways: ["commerce", "common"],
       kind: "EXPERIENCE",
       requiresTrinity: true,
+      vaultSide: "IO",
     },
     {
       id: "university-entry",
@@ -51,6 +55,32 @@ export function registerWcmNodes(): WcmNode[] {
       pathways: ["academia", "common"],
       kind: "EXPERIENCE",
       requiresTrinity: true,
+      vaultSide: "IO",
+    },
+    {
+      id: "chaos-vault-io",
+      title: "Chaos Vault — IO",
+      description: "Institutional Chaos Vault surface for verified or implied IP artifacts.",
+      route: "/chaos-vault/io",
+      wc_mode: "BUSINESS",
+      universe: DEFAULT_UNIVERSE,
+      tags: ["vault", "io", "provenance"],
+      pathways: ["chaos-vault", "commerce", "common"],
+      kind: "EXPERIENCE",
+      vaultSide: "IO",
+    },
+    {
+      id: "chaos-vault-akashic",
+      title: "Chaos Vault — Akashic",
+      description: "Restricted Akashic archive surface for unknown IP artifacts with RWA anchors.",
+      route: "/chaos-vault/akashic",
+      wc_mode: "AKASHIC",
+      universe: DEFAULT_UNIVERSE,
+      tags: ["vault", "akashic", "archive"],
+      pathways: ["chaos-vault", "akashic"],
+      kind: "EXPERIENCE",
+      vaultSide: "AKASHIC",
+      requiresPortalContext: true,
     },
     {
       id: "fen-akashic-entry",
@@ -63,6 +93,7 @@ export function registerWcmNodes(): WcmNode[] {
       pathways: ["akashic", "common"],
       kind: "PORTAL",
       requiresLabyrinth: true,
+      vaultSide: "AKASHIC",
     },
   ];
 }
@@ -85,6 +116,13 @@ export function registerWcmEdges(): PathwayEdge[] {
     },
     {
       from: "student-union-hub",
+      to: "chaos-vault-io",
+      reason: "neutral hub to vault (IO)",
+      wc_mode: "BUSINESS",
+      weight: 1,
+    },
+    {
+      from: "student-union-hub",
       to: "fen-akashic-entry",
       reason: "onboarding -> akashic",
       wc_mode: "AKASHIC",
@@ -95,6 +133,12 @@ export function registerWcmEdges(): PathwayEdge[] {
       to: "student-union-hub",
       reason: "neutral return",
       weight: 1,
+    },
+    {
+      from: "mall-entry",
+      to: "chaos-vault-io",
+      reason: "commerce artifacts route to IO vault",
+      weight: 0.9,
     },
     {
       from: "mall-entry",
@@ -110,9 +154,22 @@ export function registerWcmEdges(): PathwayEdge[] {
     },
     {
       from: "university-entry",
+      to: "chaos-vault-io",
+      reason: "research artifacts route to IO vault",
+      weight: 0.7,
+    },
+    {
+      from: "university-entry",
       to: "npc-prompt-command",
       reason: "ask for support",
       weight: 0.5,
+    },
+    {
+      from: "chaos-vault-io",
+      to: "chaos-vault-akashic",
+      reason: "portal to akashic archive",
+      portalType: "IO_TO_AKASHIC",
+      weight: 0.2,
     },
   ];
 }
@@ -144,14 +201,34 @@ export function getRelatedNodes(
 
 export function getNextNodes(
   nodeId: string,
-  options?: { wc_mode?: WCMode; universe?: string; limit?: number }
+  options?: { wc_mode?: WCMode; universe?: string; limit?: number; portalContext?: PortalContext }
 ): WcmNode[] {
   const edges = registerWcmEdges();
   const nodes = registerWcmNodes();
+  const current = nodes.find((node) => node.id === nodeId);
+
   const filteredEdges = edges.filter((edge) => {
     if (edge.from !== nodeId) return false;
     if (options?.wc_mode && edge.wc_mode && edge.wc_mode !== options.wc_mode) return false;
     if (options?.universe && edge.universe && edge.universe !== options.universe) return false;
+    if (edge.portalType) {
+      const nextNode = nodes.find((node) => node.id === edge.to);
+      const portalCheck = evaluatePortalTransition(
+        current?.vaultSide ?? "NEUTRAL",
+        nextNode?.vaultSide ?? "NEUTRAL",
+        options?.portalContext
+      );
+      if (!portalCheck.allowed) return false;
+    }
+    const nextNode = nodes.find((node) => node.id === edge.to);
+    if (nextNode?.requiresPortalContext) {
+      const portalCheck = evaluatePortalTransition(
+        current?.vaultSide ?? "NEUTRAL",
+        nextNode.vaultSide ?? "NEUTRAL",
+        options?.portalContext
+      );
+      if (!portalCheck.allowed) return false;
+    }
     return true;
   });
 

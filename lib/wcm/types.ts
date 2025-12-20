@@ -1,3 +1,5 @@
+import { PortalSide } from "../vault/routing";
+
 export type WCMode = "BUSINESS" | "AKASHIC" | "GAME" | "EDUCATION";
 
 export type UniverseId = string;
@@ -15,6 +17,8 @@ export type WcmNode = {
   requiresLabyrinth?: boolean;
   requiresTrinity?: boolean;
   hubRole?: "NEUTRAL" | "ANCHOR" | "SPECIAL";
+  vaultSide?: PortalSide;
+  requiresPortalContext?: boolean;
 };
 
 export type PathwayEdge = {
@@ -24,4 +28,5 @@ export type PathwayEdge = {
   wc_mode?: WCMode;
   universe?: UniverseId;
   weight?: number;
+  portalType?: "IO_TO_AKASHIC" | "AKASHIC_TO_IO" | "ANY_TO_RUG";
 };

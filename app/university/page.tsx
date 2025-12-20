@@ -12,6 +12,9 @@ export default function UniversityPage() {
         <WcmLink toNodeId="university-entry" intent="NEXT" className="btn">
           Continue University Pathway
         </WcmLink>
+        <WcmLink toNodeId="chaos-vault-io" intent="NEXT" className="btn">
+          Route to Chaos Vault IO
+        </WcmLink>
         <WcmLink toRoute="/student-union" className="btn">
           Return to Student Union
         </WcmLink>

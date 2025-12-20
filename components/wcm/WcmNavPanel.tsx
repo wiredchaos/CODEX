@@ -14,7 +14,7 @@ export function WcmNavPanel({ currentRoute, nodeId }: { currentRoute?: string; n
   const [hubNodes, setHubNodes] = useState<WcmNode[]>([]);
 
   const payload = useMemo(
-    () => ({ currentRoute, nodeId, wc_mode, universe, intent: "RELATED" as const }),
+    () => ({ currentRoute, nodeId, wc_mode, universe }),
     [currentRoute, nodeId, wc_mode, universe]
   );
 
