@@ -85,7 +85,7 @@ def _claim_job(metadata_path: Path) -> Optional[Dict]:
         return None
 
     metadata["status"] = STATUS_RUNNING
-    metadata["started_at"] = dt.datetime.utcnow().isoformat(timespec="seconds") + "Z"
+    metadata["started_at"] = dt.datetime.now(dt.UTC).isoformat(timespec="seconds") + "Z"
     _save_json(metadata_path, metadata)
     _update_manifest_status(metadata["job_id"], metadata["version"], STATUS_RUNNING, metadata["started_at"])
     return metadata
@@ -109,7 +109,7 @@ def _complete_job(metadata_path: Path, metadata: Dict) -> None:
     )
 
     metadata["status"] = STATUS_COMPLETED
-    metadata["completed_at"] = dt.datetime.utcnow().isoformat(timespec="seconds") + "Z"
+    metadata["completed_at"] = dt.datetime.now(dt.UTC).isoformat(timespec="seconds") + "Z"
     metadata["rendering"] = "STUB_EXECUTION"
     _save_json(metadata_path, metadata)
     _update_manifest_status(metadata["job_id"], metadata["version"], STATUS_COMPLETED, metadata["completed_at"])

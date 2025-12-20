@@ -139,7 +139,7 @@ def register_job(intake_id: str, consumer: str, requested_version: Optional[str]
         existing_versions = [p.name for p in versions_dir.iterdir() if p.is_dir()]
 
     version = _next_version(existing_versions, requested_version)
-    timestamp = dt.datetime.utcnow().isoformat(timespec="seconds") + "Z"
+    timestamp = dt.datetime.now(dt.UTC).isoformat(timespec="seconds") + "Z"
 
     version_dir = _prepare_job_dirs(intake_id, version)
     metadata = {
