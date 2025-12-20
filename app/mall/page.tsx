@@ -12,6 +12,9 @@ export default function MallPage() {
         <WcmLink toNodeId="mall-entry" intent="NEXT" className="btn">
           Continue Mall Pathway
         </WcmLink>
+        <WcmLink toNodeId="mall-entry" intent="NEXT" className="btn">
+          Enter dripONchain Thrift Store
+        </WcmLink>
         <WcmLink toNodeId="chaos-vault-io" intent="NEXT" className="btn">
           Route to Chaos Vault IO
         </WcmLink>

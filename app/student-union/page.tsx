@@ -10,6 +10,9 @@ export default function StudentUnionPage() {
         <WcmLink toNodeId="mall-entry" intent="NEXT" className="btn">
           Enter Mall
         </WcmLink>
+        <WcmLink toNodeId="mall-entry" intent="NEXT" className="btn">
+          Enter dripONchain Thrift Store
+        </WcmLink>
         <WcmLink toNodeId="university-entry" intent="NEXT" className="btn">
           Enter University
         </WcmLink>
