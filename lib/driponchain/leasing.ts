@@ -39,5 +39,8 @@ export function validateLeaseTierRequest(tier: LeaseTier, stall: Stall): { ok: b
   if (tier === "PRO" && stall.tier !== "PRO") {
     return { ok: false, message: "Requested tier exceeds stall allowance" };
   }
+  if (tier === "STANDARD" && stall.tier === "FREE") {
+    return { ok: false, message: "Requested tier exceeds stall allowance" };
+  }
   return { ok: true };
 }

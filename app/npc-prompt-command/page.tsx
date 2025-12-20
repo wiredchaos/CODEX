@@ -18,7 +18,7 @@ export default function NpcPromptCommandPage() {
       const res = await fetch("/api/wcm/resolve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wc_mode, universe, intent: "RELATED" }),
+        body: JSON.stringify({ wc_mode, universe, intent: "RELATED", nodeId: "npc-prompt-command", currentRoute: "/npc-prompt-command" }),
       });
       const data = await res.json();
       setRelatedNodes(data.relatedNodes ?? []);

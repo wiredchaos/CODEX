@@ -7,9 +7,9 @@ type ContextResult = {
   refToken?: string;
 };
 
-export function readWcmContextFromCookiesOrHeaders(): ContextResult {
-  const cookieStore = cookies();
-  const headerStore = headers();
+export async function readWcmContextFromCookiesOrHeaders(): Promise<ContextResult> {
+  const cookieStore = await cookies();
+  const headerStore = await headers();
 
   const wc_mode =
     (cookieStore.get("wc_mode")?.value as WCMode | undefined) ||
@@ -47,7 +47,7 @@ export function writeWcmContextCookies(
   if (typeof document === "undefined") return;
   const path = options?.path || "/";
   const { wc_mode, universe, refToken } = context;
-  if (wc_mode) document.cookie = `wc_mode=${wc_mode}; path=${path}`;
-  if (universe) document.cookie = `wc_universe=${universe}; path=${path}`;
-  if (refToken) document.cookie = `wc_ref=${refToken}; path=${path}`;
+  if (wc_mode) document.cookie = `wc_mode=${encodeURIComponent(wc_mode)}; path=${path}`;
+  if (universe) document.cookie = `wc_universe=${encodeURIComponent(universe)}; path=${path}`;
+  if (refToken) document.cookie = `wc_ref=${encodeURIComponent(refToken)}; path=${path}`;
 }
