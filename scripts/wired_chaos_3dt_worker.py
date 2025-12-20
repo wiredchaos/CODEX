@@ -80,8 +80,11 @@ def _update_manifest_status(job_id: str, version: str, status: str, timestamp: s
 
 
 def _claim_job(metadata_path: Path) -> Optional[Dict]:
-    metadata = _load_json(metadata_path)
-    if metadata.get("status") != STATUS_QUEUED:
+    lock_path = metadata_path.with_suffix(".lock")
+    try:
+        lock_path.open("x").close()
+    except FileExistsError:
+        # Another worker is already claiming or processing this job.
         return None
 
     metadata["status"] = STATUS_RUNNING
@@ -89,6 +92,21 @@ def _claim_job(metadata_path: Path) -> Optional[Dict]:
     _save_json(metadata_path, metadata)
     _update_manifest_status(metadata["job_id"], metadata["version"], STATUS_RUNNING, metadata["started_at"])
     return metadata
+    try:
+        metadata = _load_json(metadata_path)
+        if metadata.get("status") != STATUS_QUEUED:
+            return None
+
+        metadata["status"] = STATUS_RUNNING
+        metadata["started_at"] = dt.datetime.utcnow().isoformat(timespec="seconds") + "Z"
+        _save_json(metadata_path, metadata)
+        _update_manifest_status(
+            metadata["job_id"], metadata["version"], STATUS_RUNNING, metadata["started_at"]
+        )
+        return metadata
+    finally:
+        if lock_path.exists():
+            lock_path.unlink()
 
 
 def _complete_job(metadata_path: Path, metadata: Dict) -> None:
