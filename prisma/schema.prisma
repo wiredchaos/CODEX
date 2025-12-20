@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String          @id @default(cuid())
+  email     String          @unique
+  createdAt DateTime        @default(now())
+  accounts  TokenAccount[]
+  payments  PaymentIntent[]
+  sessions  CheckoutSession[]
+  ledger    LedgerEntry[]
+}
+
+model TokenAccount {
+  id        String        @id @default(cuid())
+  user      User          @relation(fields: [userId], references: [id])
+  userId    String
+  tokenType String        @default("WC_TOKEN")
+  balance   Int           @default(0)
+  ledger    LedgerEntry[]
+  createdAt DateTime      @default(now())
+
+  @@unique([userId, tokenType])
+}
+
+enum LedgerEntryType {
+  CREDIT_FIAT_PURCHASE
+  DEBIT_SPEND
+  CREDIT_REWARD
+  DEBIT_REFUND_REVERSAL
+  CREDIT_ADJUSTMENT
+  DEBIT_ADJUSTMENT
+  HOLD
+  RELEASE
+}
+
+enum LedgerStatus {
+  PENDING
+  SETTLED
+  FAILED
+  REVERSED
+}
+
+model LedgerEntry {
+  id          String          @id @default(cuid())
+  user        User            @relation(fields: [userId], references: [id])
+  userId      String
+  account     TokenAccount    @relation(fields: [accountId], references: [id])
+  accountId   String
+  type        LedgerEntryType
+  amount      Int
+  currency    String
+  status      LedgerStatus    @default(SETTLED)
+  reasonCode  String
+  metadata    Json?
+  createdAt   DateTime        @default(now())
+
+  @@index([userId])
+  @@index([accountId])
+}
+
+enum PaymentStatus {
+  CREATED
+  REQUIRES_ACTION
+  SUCCEEDED
+  FAILED
+  CANCELED
+  REFUNDED
+}
+
+model PaymentIntent {
+  id               String         @id @default(cuid())
+  user             User           @relation(fields: [userId], references: [id])
+  userId           String
+  provider         String
+  providerIntentId String
+  amountFiat       Int
+  fiatCurrency     String
+  status           PaymentStatus  @default(CREATED)
+  idempotencyKey   String
+  metadata         Json?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  sessions         CheckoutSession[]
+
+  @@unique([provider, providerIntentId])
+  @@unique([provider, providerIntentId, idempotencyKey])
+}
+
+enum CheckoutStatus {
+  CREATED
+  REDIRECTED
+  COMPLETED
+  CANCELED
+}
+
+model CheckoutSession {
+  id             String          @id @default(cuid())
+  user           User            @relation(fields: [userId], references: [id])
+  userId         String
+  paymentIntent  PaymentIntent   @relation(fields: [paymentIntentId], references: [id])
+  paymentIntentId String
+  status         CheckoutStatus  @default(CREATED)
+  returnUrl      String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
