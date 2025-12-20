@@ -29,7 +29,7 @@ router.get('/worlds', async (req, res) => {
     res.json({ worlds: worldsWithTokens });
   } catch (err) {
     console.error('Error fetching worlds:', err);
-    res.status(500).json({ error: 'Failed to fetch worlds', detail: (err as Error).message });
+    res.status(500).json({ error: 'Internal server error while fetching worlds from database', detail: (err as Error).message });
   }
 });
 
@@ -54,7 +54,10 @@ router.get('/patches', async (req, res) => {
     res.json({ patches });
   } catch (err) {
     console.error('Error fetching patches:', err);
-    res.status(400).json({ error: 'Failed to fetch patches', detail: (err as Error).message });
+    if (err instanceof z.ZodError) {
+      return res.status(400).json({ error: 'Invalid query parameters', detail: err.errors });
+    }
+    res.status(500).json({ error: 'Internal server error while fetching patches from database', detail: (err as Error).message });
   }
 });
 
@@ -103,7 +106,10 @@ router.post('/timeline/event', async (req, res) => {
     res.status(201).json({ event });
   } catch (err) {
     console.error('Error creating timeline event:', err);
-    res.status(400).json({ error: 'Failed to create timeline event', detail: (err as Error).message });
+    if (err instanceof z.ZodError) {
+      return res.status(400).json({ error: 'Invalid request body', detail: err.errors });
+    }
+    res.status(500).json({ error: 'Internal server error while creating timeline event', detail: (err as Error).message });
   }
 });
 
@@ -130,7 +136,10 @@ router.get('/timeline', async (req, res) => {
     res.json({ events });
   } catch (err) {
     console.error('Error fetching timeline:', err);
-    res.status(400).json({ error: 'Failed to fetch timeline', detail: (err as Error).message });
+    if (err instanceof z.ZodError) {
+      return res.status(400).json({ error: 'Invalid query parameters', detail: err.errors });
+    }
+    res.status(500).json({ error: 'Internal server error while fetching timeline from database', detail: (err as Error).message });
   }
 });
 
