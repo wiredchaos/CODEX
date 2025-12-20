@@ -37,7 +37,7 @@ export async function creditTokens(
         currency,
         status: LedgerStatus.SETTLED,
         reasonCode,
-        metadata: metadata ?? {}
+        metadata: (metadata ?? {}) as any
       }
     });
     return { balance: updatedAccount.balance, entry };
@@ -72,7 +72,7 @@ export async function spendTokens(
         currency,
         status: LedgerStatus.SETTLED,
         reasonCode,
-        metadata: metadata ?? {}
+        metadata: (metadata ?? {}) as any
       }
     });
     return { balance: updatedAccount.balance, entry };
@@ -113,7 +113,7 @@ export async function createLedgerForRefund(
         currency,
         status: LedgerStatus.REVERSED,
         reasonCode,
-        metadata: metadata ?? {}
+        metadata: (metadata ?? {}) as any
       }
     });
     return { balance: updatedAccount.balance, entry };

@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -110,4 +110,48 @@ model CheckoutSession {
   returnUrl      String
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+}
+
+model World {
+  id             String          @id
+  name           String
+  description    String?
+  tokens         String          // JSON array of tokens like ["3DT", "AKIRA_CODEX"]
+  metadata       Json?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  patches        Patch[]
+  timelineEvents TimelineEvent[]
+}
+
+model Patch {
+  id                String          @id
+  world             World           @relation(fields: [worldId], references: [id])
+  worldId           String
+  invariant         String          // Core rule/invariant this patch enforces
+  scope             String          // What area of the system this applies to
+  enforcement       String          // How the invariant is enforced
+  observableEffects String          // What observable effects this patch has
+  metadata          Json?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  timelineEvents    TimelineEvent[]
+
+  @@index([worldId])
+}
+
+model TimelineEvent {
+  id          String   @id @default(cuid())
+  world       World    @relation(fields: [worldId], references: [id])
+  worldId     String
+  patch       Patch?   @relation(fields: [patchId], references: [id])
+  patchId     String?
+  eventType   String   // e.g., "PATCH_APPLIED", "WORLD_CREATED", "ARTIFACT_MATCHED"
+  description String
+  metadata    Json?
+  timestamp   DateTime @default(now())
+
+  @@index([worldId])
+  @@index([patchId])
+  @@index([timestamp])
 }
