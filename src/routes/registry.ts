@@ -10,6 +10,19 @@ import { parseTokens } from '../lib/registry/worldMembership.js';
 
 const router = Router();
 
+// Helper to determine if we're in development mode
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
+// Helper for error responses
+function sendErrorResponse(res: any, statusCode: number, message: string, detail?: any) {
+  const response: any = { error: message };
+  // Only include detailed error info in development
+  if (isDevelopment && detail) {
+    response.detail = detail;
+  }
+  res.status(statusCode).json(response);
+}
+
 /**
  * GET /api/worlds
  * Returns all registered worlds
@@ -29,7 +42,7 @@ router.get('/worlds', async (req, res) => {
     res.json({ worlds: worldsWithTokens });
   } catch (err) {
     console.error('Error fetching worlds:', err);
-    res.status(500).json({ error: 'Internal server error while fetching worlds from database', detail: (err as Error).message });
+    sendErrorResponse(res, 500, 'Internal server error while fetching worlds from database', (err as Error).message);
   }
 });
 
@@ -55,9 +68,9 @@ router.get('/patches', async (req, res) => {
   } catch (err) {
     console.error('Error fetching patches:', err);
     if (err instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid query parameters', detail: err.errors });
+      return sendErrorResponse(res, 400, 'Invalid query parameters', err.errors);
     }
-    res.status(500).json({ error: 'Internal server error while fetching patches from database', detail: (err as Error).message });
+    sendErrorResponse(res, 500, 'Internal server error while fetching patches from database', (err as Error).message);
   }
 });
 
@@ -107,9 +120,9 @@ router.post('/timeline/event', async (req, res) => {
   } catch (err) {
     console.error('Error creating timeline event:', err);
     if (err instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid request body', detail: err.errors });
+      return sendErrorResponse(res, 400, 'Invalid request body', err.errors);
     }
-    res.status(500).json({ error: 'Internal server error while creating timeline event', detail: (err as Error).message });
+    sendErrorResponse(res, 500, 'Internal server error while creating timeline event', (err as Error).message);
   }
 });
 
@@ -137,9 +150,9 @@ router.get('/timeline', async (req, res) => {
   } catch (err) {
     console.error('Error fetching timeline:', err);
     if (err instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid query parameters', detail: err.errors });
+      return sendErrorResponse(res, 400, 'Invalid query parameters', err.errors);
     }
-    res.status(500).json({ error: 'Internal server error while fetching timeline from database', detail: (err as Error).message });
+    sendErrorResponse(res, 500, 'Internal server error while fetching timeline from database', (err as Error).message);
   }
 });
 
