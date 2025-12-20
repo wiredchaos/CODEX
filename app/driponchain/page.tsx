@@ -10,7 +10,7 @@ export default function DripOnChainPage() {
         <WcmLink toNodeId="dripONchain" intent="NEXT" className="btn">
           Continue dripONchain Pathway
         </WcmLink>
-        <WcmLink toNodeId="chaos-vault-io" intent="NEXT" className="btn">
+        <WcmLink toRoute="/chaos-vault/io" className="btn">
           Route listings to Chaos Vault IO
         </WcmLink>
         <WcmLink toRoute="/student-union" className="btn">

@@ -9,9 +9,6 @@ export default function MallPage() {
       <p>Commerce-oriented neutral experience with Trinity rendering when available.</p>
       <TrinityConsumerMount patchId="MALL" kind="lobby" />
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: "1rem" }}>
-        <WcmLink toNodeId="mall-entry" intent="NEXT" className="btn">
-          Continue Mall Pathway
-        </WcmLink>
         <WcmLink toRoute="/driponchain" className="btn">
           Enter dripONchain Thrift Store
         </WcmLink>
