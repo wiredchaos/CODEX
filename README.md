@@ -24,6 +24,12 @@ Start here for governance and coordination:
 - [TRINITY_REQUIRED_PIECES.md](TRINITY_REQUIRED_PIECES.md) — checklist placeholder for required components.
 - [TRINITY_GAPS_NEXT_ACTIONS.md](TRINITY_GAPS_NEXT_ACTIONS.md) — missing evidence and next documentation steps.
 
+## Portfolio Multiverse (non-developer view)
+- Open `portfolio_multiverse/index.html` locally or on a static host to enter the galaxy lobby immediately (no builds required).
+- Stars represent every `-3DT` patch from the registry; click a star to drop into its 3D room or open the Trinity Elevator to ride timelines.
+- Locks are enforced visually: soft-locked rooms glow amber, hard-locked rooms are hidden ghosts until your `user_state.json` meets the rules.
+- Rendering is STUB_RUNTIME-only; future engines can mount into the shared room container without changing patch content.
+
 ## How uploads work
 Uploads are drop-only: place `.zip` files in `INBOX_UPLOADS/` via **Add file → Upload files**, commit, then let automation unpack, update docs, and open a PR. Check the latest **Ingest Vercel ZIP exports** run in the **Actions** tab and review the PR for extracted files and refreshed audit docs.
 
