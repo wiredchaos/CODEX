@@ -7,9 +7,6 @@ export default function ChaosVaultIoPage() {
       <h1>Chaos Vault — IO</h1>
       <p>Institutional Chaos Vault surface for verified and implied IP artifacts with provenance focus.</p>
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: "1rem" }}>
-        <WcmLink toNodeId="chaos-vault-io" intent="NEXT" className="btn">
-          Continue via Graph Router
-        </WcmLink>
         <WcmLink toRoute="/student-union" className="btn">
           Return to Student Union
         </WcmLink>
