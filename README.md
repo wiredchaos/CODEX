@@ -29,3 +29,6 @@ Uploads are drop-only: place `.zip` files in `INBOX_UPLOADS/` via **Add file →
 
 - [UPLOAD_CONTRACT.md](UPLOAD_CONTRACT.md) — plain-language rules and what happens automatically.
 - [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) — step-by-step checks for upload, automation, verification, and merge.
+
+## 3DT Multiverse Overview
+CODEX operates as the truth layer holding manifests, contracts, and state. WIRED CHAOS is the execution layer enforcing runtime, security, and lifecycle. 3DT is the experiential layer that renders traversal for participants once conditions are satisfied. Users traverse patches non-linearly, hopping across hubs and timelines after clearing required gates, reflecting a multiverse of routes instead of a single linear application.
