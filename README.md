@@ -30,6 +30,9 @@ Start here for governance and coordination:
 - Locks are enforced visually: soft-locked rooms glow amber, hard-locked rooms are hidden ghosts until your `user_state.json` meets the rules.
 - Rendering is STUB_RUNTIME-only; future engines can mount into the shared room container without changing patch content.
 
+## Portfolio Multiverse CODEX prompt
+Use [`PORTFOLIO_MULTIVERSE_CODEX_PROMPT.md`](PORTFOLIO_MULTIVERSE_CODEX_PROMPT.md) as the paste-ready CODEX instruction set to build the WOW-first immersive lobby, Trinity Elevator, and registry-driven rooms with Akashic skipping in the WIRED CHAOS MAIN repository.
+
 ## How uploads work
 Uploads are drop-only: place `.zip` files in `INBOX_UPLOADS/` via **Add file → Upload files**, commit, then let automation unpack, update docs, and open a PR. Check the latest **Ingest Vercel ZIP exports** run in the **Actions** tab and review the PR for extracted files and refreshed audit docs.
 
