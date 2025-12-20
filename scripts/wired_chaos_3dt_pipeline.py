@@ -160,6 +160,8 @@ def register_job(intake_id: str, consumer: str, requested_version: Optional[str]
     if versions_dir.exists():
         existing_versions = [p.name for p in versions_dir.iterdir() if p.is_dir()]
 
+    version = _next_version(existing_versions, requested_version)
+    timestamp = dt.datetime.now(dt.UTC).isoformat(timespec="seconds") + "Z"
     version = _validate_segment(_next_version(existing_versions, safe_requested_version), "version")
     timestamp = dt.datetime.utcnow().isoformat(timespec="seconds") + "Z"
 
