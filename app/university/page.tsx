@@ -9,9 +9,6 @@ export default function UniversityPage() {
       <p>Education-oriented neutral experience with Trinity rendering when available.</p>
       <TrinityConsumerMount patchId="UNIVERSITY" kind="lobby" />
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: "1rem" }}>
-        <WcmLink toNodeId="university-entry" intent="NEXT" className="btn">
-          Continue University Pathway
-        </WcmLink>
         <WcmLink toRoute="/chaos-vault/io" className="btn">
           Route to Chaos Vault IO
         </WcmLink>
