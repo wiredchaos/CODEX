@@ -8,18 +8,27 @@ type ContextResult = {
 };
 
 export async function readWcmContextFromCookiesOrHeaders(): Promise<ContextResult> {
+  const decode = (value?: string | null) => {
+    if (!value) return undefined;
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value || undefined;
+    }
+  };
+
   const cookieStore = await cookies();
   const headerStore = await headers();
 
   const wc_mode =
-    (cookieStore.get("wc_mode")?.value as WCMode | undefined) ||
-    (headerStore.get("x-wc-mode") as WCMode | null) ||
+    (decode(cookieStore.get("wc_mode")?.value) as WCMode | undefined) ||
+    (decode(headerStore.get("x-wc-mode")) as WCMode | null) ||
     undefined;
 
   const universe =
-    cookieStore.get("wc_universe")?.value || headerStore.get("x-wc-universe") || undefined;
+    decode(cookieStore.get("wc_universe")?.value) || decode(headerStore.get("x-wc-universe"));
 
-  const refToken = cookieStore.get("wc_ref")?.value || headerStore.get("x-wc-ref") || undefined;
+  const refToken = decode(cookieStore.get("wc_ref")?.value) || decode(headerStore.get("x-wc-ref"));
 
   return { wc_mode, universe, refToken };
 }
