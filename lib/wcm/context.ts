@@ -10,16 +10,27 @@ type ContextResult = {
 export async function readWcmContextFromCookiesOrHeaders(): Promise<ContextResult> {
   // Fetch cookies and headers in parallel for better performance
   const [cookieStore, headerStore] = await Promise.all([cookies(), headers()]);
+  const decode = (value?: string | null) => {
+    if (!value) return undefined;
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value || undefined;
+    }
+  };
+
+  const cookieStore = await cookies();
+  const headerStore = await headers();
 
   const wc_mode =
-    (cookieStore.get("wc_mode")?.value as WCMode | undefined) ||
-    (headerStore.get("x-wc-mode") as WCMode | null) ||
+    (decode(cookieStore.get("wc_mode")?.value) as WCMode | undefined) ||
+    (decode(headerStore.get("x-wc-mode")) as WCMode | null) ||
     undefined;
 
   const universe =
-    cookieStore.get("wc_universe")?.value || headerStore.get("x-wc-universe") || undefined;
+    decode(cookieStore.get("wc_universe")?.value) || decode(headerStore.get("x-wc-universe"));
 
-  const refToken = cookieStore.get("wc_ref")?.value || headerStore.get("x-wc-ref") || undefined;
+  const refToken = decode(cookieStore.get("wc_ref")?.value) || decode(headerStore.get("x-wc-ref"));
 
   return { wc_mode, universe, refToken };
 }
@@ -52,4 +63,7 @@ export function writeWcmContextCookies(
   if (wc_mode) document.cookie = `wc_mode=${wc_mode}; path=${path}`;
   if (universe) document.cookie = `wc_universe=${universe}; path=${path}`;
   if (refToken) document.cookie = `wc_ref=${refToken}; path=${path}`;
+  if (wc_mode) document.cookie = `wc_mode=${encodeURIComponent(wc_mode)}; path=${path}`;
+  if (universe) document.cookie = `wc_universe=${encodeURIComponent(universe)}; path=${path}`;
+  if (refToken) document.cookie = `wc_ref=${encodeURIComponent(refToken)}; path=${path}`;
 }

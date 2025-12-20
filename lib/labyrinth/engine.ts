@@ -1,11 +1,13 @@
 import { getNextNodes, getNodeById, registerWcmNodes } from "../wcm/registry";
 import { WCMode } from "../wcm/types";
+import { PortalContext } from "../vault/routing";
 
 type EngineInput = {
   nodeId: string;
   wc_mode?: WCMode;
   universe?: string;
   userPrompt?: string;
+  portalContext?: PortalContext;
 };
 
 type EngineOutput = {
@@ -65,6 +67,7 @@ export function runLabyrinthStep(input: EngineInput): EngineOutput {
     wc_mode: input.wc_mode,
     universe: input.universe,
     limit: 5,
+    portalContext: input.portalContext,
   });
 
   const allowedNextNodeIds = nextNodes.slice(0, 5).map((n) => n.id);

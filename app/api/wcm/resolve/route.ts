@@ -32,7 +32,13 @@ export async function POST(req: NextRequest) {
   const hubNodes = allNodes.filter((node) => node.hubRole === "NEUTRAL");
 
   if (currentNode?.requiresLabyrinth || wc_mode === "AKASHIC") {
-    const labyrinthResult = runLabyrinthStep({ nodeId: currentNode?.id ?? nodeId ?? "", wc_mode, universe, userPrompt: prompt });
+    const labyrinthResult = runLabyrinthStep({
+      nodeId: currentNode?.id ?? nodeId ?? "",
+      wc_mode,
+      universe,
+      userPrompt: prompt,
+      portalContext: resolvedPortalContext,
+    });
     const nextNodes = labyrinthResult.allowedNextNodeIds
       .map((id) => getNodeById(id))
       .filter(Boolean);
