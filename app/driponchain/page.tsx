@@ -7,10 +7,7 @@ export default function DripOnChainPage() {
       <h1>dripONchain Thrift Store</h1>
       <p>Blockchain thrift store inside the Student Union → Mall pathway with protected trade by default.</p>
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: "1rem" }}>
-        <WcmLink toNodeId="dripONchain" intent="NEXT" className="btn">
-          Continue dripONchain Pathway
-        </WcmLink>
-        <WcmLink toNodeId="chaos-vault-io" intent="NEXT" className="btn">
+        <WcmLink toRoute="/chaos-vault/io" className="btn">
           Route listings to Chaos Vault IO
         </WcmLink>
         <WcmLink toRoute="/student-union" className="btn">
