@@ -1,0 +1,6 @@
+{
+  "artifacts": ["genesis-token", "portfolio-pass"],
+  "nfts": [],
+  "flags": ["elevator-briefed"],
+  "puzzles": ["gallery-riddle"]
+}

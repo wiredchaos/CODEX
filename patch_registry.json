@@ -1,0 +1,343 @@
+[
+  {
+    "patch_id": "33-3-vss-3-dt",
+    "display_name": "33 3 Vss 3 Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [],
+      "hard": []
+    },
+    "trinity_level": 1,
+    "3d_scene_profile": {
+      "lighting": "neon",
+      "motion": "pulse",
+      "particles": "embers",
+      "scale": "micro"
+    },
+    "route_slug": "33-3-vss-3-dt"
+  },
+  {
+    "patch_id": "789-ddcartoon-s-3DT",
+    "display_name": "789 Ddcartoon S 3Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [],
+      "hard": []
+    },
+    "trinity_level": 2,
+    "3d_scene_profile": {
+      "lighting": "noir",
+      "motion": "slow_orbit",
+      "particles": "mist",
+      "scale": "macro"
+    },
+    "route_slug": "789-ddcartoon-s-3dt"
+  },
+  {
+    "patch_id": "789-hex-pp-3-dt",
+    "display_name": "789 Hex Pp 3 Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [
+        "artifact:genesis-token"
+      ],
+      "hard": []
+    },
+    "trinity_level": 3,
+    "3d_scene_profile": {
+      "lighting": "cosmic",
+      "motion": "spiral",
+      "particles": "mist",
+      "scale": "macro"
+    },
+    "route_slug": "789-hex-pp-3-dt"
+  },
+  {
+    "patch_id": "789-master-3-dt",
+    "display_name": "789 Master 3 Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [],
+      "hard": []
+    },
+    "trinity_level": 4,
+    "3d_scene_profile": {
+      "lighting": "cosmic",
+      "motion": "drift",
+      "particles": "mist",
+      "scale": "heroic"
+    },
+    "route_slug": "789-master-3-dt"
+  },
+  {
+    "patch_id": "789-ott-3-dt",
+    "display_name": "789 Ott 3 Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [],
+      "hard": [
+        "nft:alpha-key"
+      ]
+    },
+    "trinity_level": 5,
+    "3d_scene_profile": {
+      "lighting": "ambient",
+      "motion": "drift",
+      "particles": "dust",
+      "scale": "panorama"
+    },
+    "route_slug": "789-ott-3-dt"
+  },
+  {
+    "patch_id": "789-v-2-1-cyan-3-dt",
+    "display_name": "789 V 2 1 Cyan 3 Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [
+        "artifact:genesis-token"
+      ],
+      "hard": []
+    },
+    "trinity_level": 6,
+    "3d_scene_profile": {
+      "lighting": "neon",
+      "motion": "spiral",
+      "particles": "mist",
+      "scale": "panorama"
+    },
+    "route_slug": "789-v-2-1-cyan-3-dt"
+  },
+  {
+    "patch_id": "akira-codex-engine-3-dt",
+    "display_name": "Akira Codex Engine 3 Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [],
+      "hard": []
+    },
+    "trinity_level": 7,
+    "3d_scene_profile": {
+      "lighting": "cosmic",
+      "motion": "pulse",
+      "particles": "embers",
+      "scale": "heroic"
+    },
+    "route_slug": "akira-codex-engine-3-dt"
+  },
+  {
+    "patch_id": "akira-codex-nca-3-dt",
+    "display_name": "Akira Codex Nca 3 Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [],
+      "hard": []
+    },
+    "trinity_level": 8,
+    "3d_scene_profile": {
+      "lighting": "ambient",
+      "motion": "spiral",
+      "particles": "dust",
+      "scale": "macro"
+    },
+    "route_slug": "akira-codex-nca-3-dt"
+  },
+  {
+    "patch_id": "apple-time-rolo-3-dt",
+    "display_name": "Apple Time Rolo 3 Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [
+        "artifact:genesis-token"
+      ],
+      "hard": []
+    },
+    "trinity_level": 9,
+    "3d_scene_profile": {
+      "lighting": "ambient",
+      "motion": "spiral",
+      "particles": "dust",
+      "scale": "macro"
+    },
+    "route_slug": "apple-time-rolo-3-dt"
+  },
+  {
+    "patch_id": "bwb-ee-3-dt",
+    "display_name": "Bwb Ee 3 Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [],
+      "hard": [
+        "nft:alpha-key"
+      ]
+    },
+    "trinity_level": 10,
+    "3d_scene_profile": {
+      "lighting": "neon",
+      "motion": "pulse",
+      "particles": "rays",
+      "scale": "heroic"
+    },
+    "route_slug": "bwb-ee-3-dt"
+  },
+  {
+    "patch_id": "clear-3-dt",
+    "display_name": "Clear 3 Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [],
+      "hard": []
+    },
+    "trinity_level": 11,
+    "3d_scene_profile": {
+      "lighting": "cosmic",
+      "motion": "pulse",
+      "particles": "mist",
+      "scale": "micro"
+    },
+    "route_slug": "clear-3-dt"
+  },
+  {
+    "patch_id": "creator-codex-studio-3-dt",
+    "display_name": "Creator Codex Studio 3 Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [
+        "artifact:genesis-token"
+      ],
+      "hard": []
+    },
+    "trinity_level": 12,
+    "3d_scene_profile": {
+      "lighting": "noir",
+      "motion": "spiral",
+      "particles": "dust",
+      "scale": "panorama"
+    },
+    "route_slug": "creator-codex-studio-3-dt"
+  },
+  {
+    "patch_id": "d-rip-on-chain-3-dt",
+    "display_name": "D Rip On Chain 3 Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [],
+      "hard": []
+    },
+    "trinity_level": 13,
+    "3d_scene_profile": {
+      "lighting": "ambient",
+      "motion": "spiral",
+      "particles": "mist",
+      "scale": "panorama"
+    },
+    "route_slug": "d-rip-on-chain-3-dt"
+  },
+  {
+    "patch_id": "discord-bot-build-3DT",
+    "display_name": "Discord Bot Build 3Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [],
+      "hard": []
+    },
+    "trinity_level": 14,
+    "3d_scene_profile": {
+      "lighting": "cosmic",
+      "motion": "drift",
+      "particles": "mist",
+      "scale": "micro"
+    },
+    "route_slug": "discord-bot-build-3dt"
+  },
+  {
+    "patch_id": "fen-geo-p-3-dt",
+    "display_name": "Fen Geo P 3 Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [
+        "artifact:genesis-token"
+      ],
+      "hard": [
+        "nft:alpha-key"
+      ]
+    },
+    "trinity_level": 15,
+    "3d_scene_profile": {
+      "lighting": "ambient",
+      "motion": "drift",
+      "particles": "dust",
+      "scale": "micro"
+    },
+    "route_slug": "fen-geo-p-3-dt"
+  },
+  {
+    "patch_id": "minecraft-3-dt",
+    "display_name": "Minecraft 3 Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [],
+      "hard": []
+    },
+    "trinity_level": 16,
+    "3d_scene_profile": {
+      "lighting": "ambient",
+      "motion": "slow_orbit",
+      "particles": "mist",
+      "scale": "macro"
+    },
+    "route_slug": "minecraft-3-dt"
+  },
+  {
+    "patch_id": "neura-tax-component-3-dt",
+    "display_name": "Neura Tax Component 3 Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [],
+      "hard": []
+    },
+    "trinity_level": 17,
+    "3d_scene_profile": {
+      "lighting": "noir",
+      "motion": "drift",
+      "particles": "rays",
+      "scale": "micro"
+    },
+    "route_slug": "neura-tax-component-3-dt"
+  },
+  {
+    "patch_id": "wcm-emergent-build-v1-0-3-dt",
+    "display_name": "Wcm Emergent Build V1 0 3 Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [
+        "artifact:genesis-token"
+      ],
+      "hard": []
+    },
+    "trinity_level": 18,
+    "3d_scene_profile": {
+      "lighting": "neon",
+      "motion": "pulse",
+      "particles": "dust",
+      "scale": "micro"
+    },
+    "route_slug": "wcm-emergent-build-v1-0-3-dt"
+  },
+  {
+    "patch_id": "wired-chaos-hub-3-dt",
+    "display_name": "Wired Chaos Hub 3 Dt",
+    "room_type": "portfolio",
+    "access_rules": {
+      "soft": [],
+      "hard": []
+    },
+    "trinity_level": 19,
+    "3d_scene_profile": {
+      "lighting": "ambient",
+      "motion": "spiral",
+      "particles": "rays",
+      "scale": "panorama"
+    },
+    "route_slug": "wired-chaos-hub-3-dt"
+  }
+]
