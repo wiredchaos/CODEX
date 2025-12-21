@@ -37,3 +37,8 @@ The Portfolio Multiverse makes every `-3DT` patch auto-appear as a navigable 3D 
 - All rooms consume the shared STUB_RUNTIME layer; rendering is mocked but deterministic.
 - No rendering logic lives inside patch content; patches contribute metadata + assets only.
 - Integration points for v0.app are commented in the runtime script for future engine binding.
+
+## Validation status
+- Typecheck lock: `python -m compileall scripts` and `node --check portfolio_multiverse/runtime/portfolio_multiverse.js` must stay green before TourNavigator v2 integration.
+- Runtime lock: Trinity Elevator and `/rooms/<patch_id>` mounts render immediately (no blank frames) and respect registry-only scene selection with sealed/open enforcement.
+- Access lock: Galaxy/attract layers remain non-authoritative; unlock checks rely solely on `patch_registry.json` + `user_state.json` at runtime.
