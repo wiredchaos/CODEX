@@ -1,0 +1,244 @@
+.shell {
+  min-height: 100vh;
+  padding: 32px;
+  background: #000000;
+  color: #00ffff;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  font-size: 24px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px 24px;
+  background: #0a0a0a;
+  border: 1px solid #00ffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.12);
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.labelText {
+  color: #00ffff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.input {
+  background: #050505;
+  border: 1px solid #00ffff;
+  color: #00ffff;
+  padding: 10px;
+  border-radius: 8px;
+  font-family: inherit;
+}
+
+.input:focus {
+  outline: 1px solid #00ffff;
+  box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.12);
+}
+
+.inputError {
+  border-color: #ff3131;
+  box-shadow: 0 0 0 2px rgba(255, 49, 49, 0.35);
+}
+
+.textArea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.error {
+  color: #ff3131;
+  font-size: 12px;
+}
+
+.radioGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.radioOption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #050505;
+  border: 1px solid #00ffff;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+.radioOption input {
+  accent-color: #00ffff;
+}
+
+.radioLabel {
+  text-transform: capitalize;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.primaryButton,
+.secondaryButton {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #00ffff;
+  background: #001111;
+  color: #00ffff;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.primaryButton[disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.primaryButton {
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.25);
+}
+
+.secondaryButton {
+  background: transparent;
+  color: #00ffff;
+}
+
+.statusCard {
+  background: #0a0a0a;
+  border: 1px solid #00ffff;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.statusHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.statusTitle {
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.statusMeta {
+  font-size: 12px;
+  color: #7ff6ff;
+}
+
+.progressBar {
+  background: #050505;
+  border: 1px solid #00ffff;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #00ffff, #008b8b);
+  transition: width 0.6s ease;
+}
+
+.statusLine {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.statusTag {
+  background: #001515;
+  border: 1px solid #00ffff;
+  border-radius: 6px;
+  padding: 4px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+}
+
+.statusMessage {
+  font-size: 14px;
+  color: #7ff6ff;
+}
+
+.sectionLabel {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 12px;
+  color: #7ff6ff;
+}
+
+.artifactBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.artifactList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.artifactItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #050505;
+  border: 1px solid #00ffff;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+.artifactType {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #7ff6ff;
+}
+
+.artifactLink {
+  color: #00ffff;
+  word-break: break-all;
+}
+
+@media (max-width: 640px) {
+  .form {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

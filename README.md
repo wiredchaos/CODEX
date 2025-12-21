@@ -18,6 +18,13 @@ Start here for governance and coordination:
 - [PATCHES.md](PATCHES.md) — prioritized patch queue with owners and definitions of done.
 - [RUNBOOK.md](RUNBOOK.md) — step-by-step workflow for agents and maintainers.
 
+## WIRED CHAOS Intake Protocol UI
+
+The Next.js intake panel provides a 3DT job creator and live status console. Run it locally:
+
+1. Install dependencies: `npm install`
+2. Start the dev server: `npm run dev`
+3. Open http://localhost:3000 and submit intake payloads. The UI will create a job, poll its status, and surface artifacts when complete.
 ## Trinity / 3DT audit (status only)
 - [CRAB_LEGS_INDEX.md](CRAB_LEGS_INDEX.md) — Vercel transcript index; currently waiting on exports.
 - [TRINITY_INSTALL_CATALOG.md](TRINITY_INSTALL_CATALOG.md) — repo and transcript status by evidence.
