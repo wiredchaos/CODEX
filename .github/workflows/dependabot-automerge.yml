@@ -1,0 +1,58 @@
+name: Dependabot auto-merge
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  automerge:
+    if: github.actor == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Label risky updates
+        if: steps.metadata.outputs.update-type == 'version-update:semver-major'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = 'needs-human';
+            const pr = context.payload.pull_request;
+            const labels = pr.labels.map(l => l.name);
+            if (!labels.includes(label)) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: [label]
+              });
+            }
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body: 'Major version bump detected. Please review for potential breaking changes and add migration notes before merging.'
+            });
+
+      - name: Enable auto-merge for safe updates
+        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            await github.graphql(
+              `mutation($pullRequestId: ID!) {
+                enablePullRequestAutoMerge(input: {pullRequestId: $pullRequestId, mergeMethod: SQUASH}) {
+                  pullRequest { number }
+                }
+              }`,
+              { pullRequestId: pr.node_id }
+            );
