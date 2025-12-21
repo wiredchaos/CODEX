@@ -1,0 +1,162 @@
+[
+  {
+    "id": "wired-chaos-hub-3dt",
+    "name": "Wired Chaos Hub",
+    "type": "HUB",
+    "consumer_3dt": true,
+    "description": "Anchor hub for cross-timeline routing and runtime synchronization across the multiverse.",
+    "artifacts": ["hub-schematic-v1", "runtime-handshake-proof"],
+    "timelines": ["trinity-prime-timeline"],
+    "gates": {
+      "requires_nft": null,
+      "requires_artifact": "hub-schematic-v1",
+      "requires_clue": null,
+      "allow_skip_if": ["manual-override:core-admin"]
+    },
+    "links": ["akira-codex-engine-3dt", "fen-trifecta-3dt", "vault33-layer-3dt"],
+    "status_defaults": {
+      "locked": false,
+      "visible": true
+    }
+  },
+  {
+    "id": "akira-codex-engine-3dt",
+    "name": "AKIRA Codex Engine",
+    "type": "PATCH",
+    "consumer_3dt": true,
+    "description": "Execution-grade patch exposing AKIRA runtimes for Trinity test harnessing.",
+    "artifacts": ["akira-engine-build", "akira-diagnostics-report"],
+    "timelines": ["trinity-prime-timeline"],
+    "gates": {
+      "requires_nft": "akira-access-pass",
+      "requires_artifact": null,
+      "requires_clue": null,
+      "allow_skip_if": ["artifact:akira-diagnostics-report"]
+    },
+    "links": ["fen-trifecta-3dt", "vault33-layer-3dt"],
+    "status_defaults": {
+      "locked": true,
+      "visible": true
+    }
+  },
+  {
+    "id": "fen-trifecta-3dt",
+    "name": "FEN Trifecta",
+    "type": "PATCH",
+    "consumer_3dt": true,
+    "description": "Tri-lane traversal proving ground tying FEN data, navigation, and signal-handling.",
+    "artifacts": ["fen-map-fragment", "fen-audio-token"],
+    "timelines": ["trinity-prime-timeline", "afterhours-thread"],
+    "gates": {
+      "requires_nft": null,
+      "requires_artifact": "fen-map-fragment",
+      "requires_clue": "fen-audio-cipher",
+      "allow_skip_if": ["artifact:fen-audio-token"]
+    },
+    "links": ["vault33-layer-3dt", "789-afterhours-3dt"],
+    "status_defaults": {
+      "locked": true,
+      "visible": false
+    }
+  },
+  {
+    "id": "vault33-layer-3dt",
+    "name": "Vault33 Layer",
+    "type": "PATCH",
+    "consumer_3dt": true,
+    "description": "Containment chamber for state snapshots, secure storage proofs, and Trinity elevator anchoring.",
+    "artifacts": ["vault33-snapshot", "elevator-handshake"],
+    "timelines": ["trinity-prime-timeline"],
+    "gates": {
+      "requires_nft": "vault33-keycard",
+      "requires_artifact": "vault33-snapshot",
+      "requires_clue": null,
+      "allow_skip_if": ["manual-override:security-officer"]
+    },
+    "links": ["fen-trifecta-3dt", "wired-chaos-hub-3dt"],
+    "status_defaults": {
+      "locked": true,
+      "visible": true
+    }
+  },
+  {
+    "id": "789-afterhours-3dt",
+    "name": "789 Afterhours",
+    "type": "PATCH",
+    "consumer_3dt": true,
+    "description": "Late-cycle exploration strand carrying nightlife telemetry and social puzzles.",
+    "artifacts": ["afterhours-ticket", "signal-polaroid"],
+    "timelines": ["afterhours-thread"],
+    "gates": {
+      "requires_nft": null,
+      "requires_artifact": "afterhours-ticket",
+      "requires_clue": "afterhours-frequency",
+      "allow_skip_if": []
+    },
+    "links": ["fen-trifecta-3dt", "wired-chaos-hub-3dt"],
+    "status_defaults": {
+      "locked": true,
+      "visible": true
+    }
+  },
+  {
+    "id": "cipher-lab-alpha",
+    "name": "Cipher Lab Alpha",
+    "type": "PATCH",
+    "consumer_3dt": false,
+    "description": "Non-3DT research patch focused on offline cryptography drills and clue authoring.",
+    "artifacts": ["cipher-keyring", "lab-notes-v1"],
+    "timelines": ["trinity-prime-timeline"],
+    "gates": {
+      "requires_nft": null,
+      "requires_artifact": null,
+      "requires_clue": null,
+      "allow_skip_if": []
+    },
+    "links": ["wired-chaos-hub-3dt"],
+    "status_defaults": {
+      "locked": false,
+      "visible": true
+    }
+  },
+  {
+    "id": "trinity-prime-timeline",
+    "name": "Trinity Prime Timeline",
+    "type": "TIMELINE",
+    "consumer_3dt": false,
+    "description": "Primary canonical sequence linking core patches and governance checkpoints.",
+    "artifacts": [],
+    "timelines": [],
+    "gates": {
+      "requires_nft": null,
+      "requires_artifact": null,
+      "requires_clue": null,
+      "allow_skip_if": []
+    },
+    "links": ["wired-chaos-hub-3dt", "akira-codex-engine-3dt", "vault33-layer-3dt", "cipher-lab-alpha"],
+    "status_defaults": {
+      "locked": false,
+      "visible": true
+    }
+  },
+  {
+    "id": "afterhours-thread",
+    "name": "Afterhours Thread",
+    "type": "TIMELINE",
+    "consumer_3dt": false,
+    "description": "Parallel thread aggregating nightlife and social discovery patches for late-session traversal.",
+    "artifacts": [],
+    "timelines": [],
+    "gates": {
+      "requires_nft": null,
+      "requires_artifact": null,
+      "requires_clue": null,
+      "allow_skip_if": []
+    },
+    "links": ["fen-trifecta-3dt", "789-afterhours-3dt", "wired-chaos-hub-3dt"],
+    "status_defaults": {
+      "locked": false,
+      "visible": true
+    }
+  }
+]
