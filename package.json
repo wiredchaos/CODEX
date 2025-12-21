@@ -1,32 +1,16 @@
 {
-  "name": "wired-chaos-economy",
-  "version": "1.0.0",
+  "name": "neuro-vercel",
+  "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx src/server.ts",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:seed": "tsx prisma/seed.ts",
-    "build": "tsc",
-    "start": "node dist/server.js"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
   "dependencies": {
-    "@prisma/client": "^5.18.0",
-    "cors": "^2.8.5",
-    "express": "^4.19.2",
-    "helmet": "^7.1.0",
-    "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "@types/cors": "^2.8.19",
-    "@types/express": "^4.17.21",
-    "@types/node": "^22.0.0",
-    "prisma": "^5.18.0",
-    "ts-node": "^10.9.2",
-    "tsx": "^4.21.0",
-    "typescript": "^5.4.0"
+    "next": "14.2.3",
+    "openai": "^4.52.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   }
 }
