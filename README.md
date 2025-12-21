@@ -8,9 +8,16 @@ See [COPILOT_PROMPT.md](COPILOT_PROMPT.md) for the recommended Copilot Chat prom
 ## Org synchronization report
 For the latest synthesized view of the WIRED CHAOS GitHub organization, review the [ORG_SYNCHRONIZATION_REPORT.md](ORG_SYNCHRONIZATION_REPORT.md).
 
+## Fashion Design Swarm
+The [FASHION_DESIGN_SWARM.md](FASHION_DESIGN_SWARM.md) brief captures the FDS-1 onboarding blueprint for bringing Web2 fashion designers into the dripONchain™ lab.
+
 ## CRAB Kernel and Patch Board
 Start here for governance and coordination:
 - [KERNEL.md](KERNEL.md) — authority model and operating rules.
 - [STATE.md](STATE.md) — current snapshot of repositories and classifications.
 - [PATCHES.md](PATCHES.md) — prioritized patch queue with owners and definitions of done.
 - [RUNBOOK.md](RUNBOOK.md) — step-by-step workflow for agents and maintainers.
+
+## Agents
+Prototype agents and reference implementations:
+- [vision_struct_agent.py](vision_struct_agent.py) — FastAPI wrapper and Swarm interface for Vision-to-JSON multimodal extraction.
