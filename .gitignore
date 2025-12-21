@@ -7,3 +7,9 @@ yarn-error.log*
 pnpm-lock.yaml
 .env*
 .DS_Store
+npm-debug.log
+dist
+.env
+dev.db
+*.sqlite
+.prisma

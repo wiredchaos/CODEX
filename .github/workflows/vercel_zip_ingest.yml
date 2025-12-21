@@ -1,0 +1,61 @@
+name: Ingest Vercel ZIP exports
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "INBOX_UPLOADS/*.zip"
+      - "INBOX_UPLOADS/**/*.zip"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  ingest-zips:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Vercel ZIP ingest
+        run: python scripts/vercel_zip_ingest.py
+
+      - name: Detect changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create PR
+        if: steps.changes.outputs.changed == 'true'
+        id: create-pr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "audit: ingest Vercel transcripts"
+          commit-message: "chore: ingest Vercel ZIP exports"
+          branch: "automation/vercel-zip-ingest"
+          delete-branch: true
+          body: |
+            Documentation-only. Anti-Moloch compliant. UNKNOWN where no evidence.
+            - ingest uploaded ZIP archives from INBOX_UPLOADS/
+            - extract transcripts and refresh audit docs
+            - update manifest and run summary under VERCEL_HISTORY
+
+      - name: Comment with run summary
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ steps.create-pr.outputs.pull-request-number }}
+          body: |
+            Automated ingest completed.
+            - Summary: $(jq -r '"zips=" + (.total_zips|tostring) + ", transcripts=" + (.total_transcripts|tostring) + ", trinity_hits=" + (.total_trinity_hits|tostring)' VERCEL_HISTORY/exports/_INGEST_RUN_SUMMARY.json)
+            - Updated files: [CRAB_LEGS_INDEX.md](../CRAB_LEGS_INDEX.md), [TRINITY_INSTALL_CATALOG.md](../TRINITY_INSTALL_CATALOG.md), [TRINITY_GAPS_NEXT_ACTIONS.md](../TRINITY_GAPS_NEXT_ACTIONS.md), [VERCEL_HISTORY/exports/_MANIFEST.json](../VERCEL_HISTORY/exports/_MANIFEST.json)

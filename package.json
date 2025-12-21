@@ -20,5 +20,18 @@
     "eslint": "8.57.0",
     "eslint-config-next": "14.2.3",
     "typescript": "5.4.5"
+  "name": "neuro-vercel",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "14.2.3",
+    "openai": "^4.52.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   }
 }

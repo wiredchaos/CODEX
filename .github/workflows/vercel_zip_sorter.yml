@@ -13,6 +13,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
+name: Auto-sort Vercel ZIP uploads
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "INBOX_UPLOADS/**"
+      - "*.zip"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sort-zips:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -30,6 +48,13 @@ jobs:
 
       - name: Check for changes
         id: git_status
+          python-version: "3.11"
+
+      - name: Run sorter
+        run: python scripts/vercel_zip_sorter.py
+
+      - name: Detect changes
+        id: changes
         run: |
           if git diff --quiet; then
             echo "changed=false" >> $GITHUB_OUTPUT
@@ -60,3 +85,15 @@ jobs:
             --body "Automation only. No lore changes. Anti-Moloch compliant." \
             --base main \
             --head "${{ steps.create_branch.outputs.branch }}"
+      - name: Create PR
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "chore: auto-sort Vercel zips into VERCEL_HISTORY"
+          commit-message: "chore: auto-sort Vercel zip uploads"
+          branch: "automation/vercel-zip-sorter"
+          delete-branch: true
+          body: |
+            Automation only. No lore changes. Anti-Moloch compliant.
+            - Moves uploaded ZIPs into VERCEL_HISTORY/{exports,3dt,builds,misc}
+            - Updates VERCEL_HISTORY/exports/_MANIFEST.json

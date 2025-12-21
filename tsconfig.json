@@ -18,4 +18,15 @@
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
+    "target": "ES2022",
+    "lib": ["DOM", "ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": false,
+    "noEmit": true,
+    "jsx": "preserve",
+    "paths": {
+      "@/*": ["./*"]
+    }
+  }
 }
