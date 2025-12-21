@@ -32,3 +32,9 @@ Uploads are drop-only: place `.zip` files in `INBOX_UPLOADS/` via **Add file →
 
 ## 3DT Multiverse Overview
 CODEX operates as the truth layer holding manifests, contracts, and state. WIRED CHAOS is the execution layer enforcing runtime, security, and lifecycle. 3DT is the experiential layer that renders traversal for participants once conditions are satisfied. Users traverse patches non-linearly, hopping across hubs and timelines after clearing required gates, reflecting a multiverse of routes instead of a single linear application.
+
+## Development setup
+- Install dependencies with `pnpm`.
+- If your network blocks the default registry, pin npm to the public registry before installing: `npm config set registry https://registry.npmjs.org/`.
+- The repo includes a checked-in `.npmrc` with the same registry pin to keep installs consistent across environments.
+- If you need to consume scoped packages hosted on GitHub Packages, authenticate with your scope before installing: `npm login --scope=@yourScope --registry=https://npm.pkg.github.com`.
