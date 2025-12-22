@@ -19,6 +19,7 @@ BASE_DIR = Path("WIRED_CHAOS_3DT")
 INTAKE_DIR = BASE_DIR / "INTAKE"
 JOBS_DIR = BASE_DIR / "JOBS"
 MANIFEST_PATH = BASE_DIR / "_JOBS_MANIFEST.json"
+STATUS_PENDING = "pending"
 
 
 def _load_manifest() -> Dict:
@@ -101,6 +102,9 @@ def _update_manifest(job_id: str, version: str, consumer: str, timestamp: str, n
         "timestamp": timestamp,
         "consumer": consumer,
         "status": status,
+        "notes": notes,
+        "owned_by": "Wired Chaos",
+        "rendering": STATUS_PENDING,
         "status": "placeholder",
         "notes": notes,
         "owned_by": "Wired Chaos",
@@ -182,12 +186,19 @@ def register_job(intake_id: str, consumer: str, requested_version: Optional[str]
     version_dir = _prepare_job_dirs(intake_id, version)
     metadata = {
         "job_id": intake_id,
+        "consumer": normalized_consumer,
         "consumer": consumer,
         "version": version,
         "timestamp": timestamp,
         "intake_path": str(intake_path),
         "owned_by": "Wired Chaos",
         "intake_mode": "job",
+        "rendering": STATUS_PENDING,
+        "status": STATUS_PENDING,
+        "notes": notes,
+    }
+    _write_version_metadata(version_dir, metadata)
+    _update_manifest(intake_id, version, normalized_consumer, timestamp, notes, status=STATUS_PENDING)
         "rendering": "pending",
         "status": "queued",
         "notes": notes,

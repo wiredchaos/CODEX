@@ -20,6 +20,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Wired Chaos 3DT worker
+        run: |
+          python -m pip install --upgrade pip
+          python scripts/wired_chaos_3dt_worker.py \
+            $( [ "${{ github.event.inputs.watch }}" = "true" ] && echo --watch ) \
+            --poll-seconds "${{ github.event.inputs.poll_seconds }}" \
         env:
           WATCH: ${{ github.event.inputs.watch }}
           POLL_SECONDS: ${{ github.event.inputs.poll_seconds }}

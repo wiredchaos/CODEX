@@ -18,6 +18,16 @@ The Portfolio Multiverse makes every `-3DT` patch auto-appear as a navigable 3D 
 - Ambient particles and motion persist across lobby, rooms, and elevator views.
 - Audio hooks are stubbed; integrate future engines in `portfolio_multiverse/runtime/portfolio_multiverse.js` (see `audio` object).
 
+## Determinism and authority
+- Scene construction is 100% registry-driven; `/rooms/<patch_id>` only renders entries present in `patch_registry.json`.
+- Attract layers (galaxy view) are cosmetic and disposable; they never author state or bypass access rules.
+- Elevator and room routing respect sealed/open states directly from registry + `user_state.json`—no ad hoc overrides.
+
+## Interfaces locked for TourNavigator v2
+- `patch_registry.json` schema is fixed (patch_id, display_name, room_type, access_rules, trinity_level, 3d_scene_profile, route_slug).
+- Room3D onReady contract remains STUB_RUNTIME-only; engines may mount into `.pmv-room` without altering registry semantics.
+- Trinity Elevator mount API is stable: `/elevator` renders immediately with no pre-scene blanks and reads straight from the registry.
+
 ## Locking semantics
 - `access_rules.soft` → visible but inaccessible; rendered with amber accents.
 - `access_rules.hard` → hidden; represented as ghost nodes/tiles.
@@ -27,3 +37,8 @@ The Portfolio Multiverse makes every `-3DT` patch auto-appear as a navigable 3D 
 - All rooms consume the shared STUB_RUNTIME layer; rendering is mocked but deterministic.
 - No rendering logic lives inside patch content; patches contribute metadata + assets only.
 - Integration points for v0.app are commented in the runtime script for future engine binding.
+
+## Validation status
+- Typecheck lock: `python -m compileall scripts` and `node --check portfolio_multiverse/runtime/portfolio_multiverse.js` must stay green before TourNavigator v2 integration.
+- Runtime lock: Trinity Elevator and `/rooms/<patch_id>` mounts render immediately (no blank frames) and respect registry-only scene selection with sealed/open enforcement.
+- Access lock: Galaxy/attract layers remain non-authoritative; unlock checks rely solely on `patch_registry.json` + `user_state.json` at runtime.
