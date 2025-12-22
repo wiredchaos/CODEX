@@ -21,6 +21,9 @@ Start here for governance and coordination:
 - [PATCHES.md](PATCHES.md) — prioritized patch queue with owners and definitions of done.
 - [RUNBOOK.md](RUNBOOK.md) — step-by-step workflow for agents and maintainers.
 
+## Agents
+Prototype agents and reference implementations:
+- [vision_struct_agent.py](vision_struct_agent.py) — FastAPI wrapper and Swarm interface for Vision-to-JSON multimodal extraction.
 ## WIRED CHAOS Intake Protocol UI
 
 The Next.js intake panel provides a 3DT job creator and live status console. Run it locally:
