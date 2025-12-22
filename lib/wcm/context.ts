@@ -44,6 +44,10 @@ export function serializeWcmContext({
   universe?: string;
   refToken?: string;
 }): string {
+  const parts = [];
+  if (wc_mode) parts.push(`wc_mode=${encodeURIComponent(wc_mode)}`);
+  if (universe) parts.push(`wc_universe=${encodeURIComponent(universe)}`);
+  if (refToken) parts.push(`wc_ref=${encodeURIComponent(refToken)}`);
   const parts: string[] = [];
   if (wc_mode) parts.push(`wc_mode=${wc_mode}`);
   if (universe) parts.push(`wc_universe=${universe}`);
