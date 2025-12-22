@@ -7,6 +7,7 @@ import { prisma } from '../lib/prisma.js';
 import { DEFAULT_TOKEN, resolveTokenAmountFromPack, tokenPacks } from '../config/tokenPacks.js';
 import { creditTokens, spendTokens, getBalance, createLedgerForRefund } from '../lib/economy/billing.js';
 import { CheckoutStatus, PaymentStatus } from '@prisma/client';
+import registryRouter from './routes/registry.js';
 
 const app = express();
 app.use(cors());
@@ -199,6 +200,9 @@ app.get('/api/tokens/balance', async (req, res) => {
 app.get('/api/token-packs', (_req, res) => {
   res.json(tokenPacks);
 });
+
+// Mount registry routes
+app.use('/api', registryRouter);
 
 app.use(express.static('public'));
 
