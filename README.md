@@ -2,6 +2,9 @@
 
 WIRED CHAOS WORKFLOW PUBLISH CODEX
 
+## Structure
+- `README.md`: Brief label for the repository and quick pointers.
+- `DIAGNOSTIC.md`: Current snapshot of repository layout, status, and recommended next steps.
 ## Copilot prompt
 See [COPILOT_PROMPT.md](COPILOT_PROMPT.md) for the recommended Copilot Chat prompt to synchronize on the WIRED CHAOS organization.
 
@@ -18,6 +21,13 @@ Start here for governance and coordination:
 - [PATCHES.md](PATCHES.md) — prioritized patch queue with owners and definitions of done.
 - [RUNBOOK.md](RUNBOOK.md) — step-by-step workflow for agents and maintainers.
 
+## WIRED CHAOS Intake Protocol UI
+
+The Next.js intake panel provides a 3DT job creator and live status console. Run it locally:
+
+1. Install dependencies: `npm install`
+2. Start the dev server: `npm run dev`
+3. Open http://localhost:3000 and submit intake payloads. The UI will create a job, poll its status, and surface artifacts when complete.
 ## Trinity / 3DT audit (status only)
 - [CRAB_LEGS_INDEX.md](CRAB_LEGS_INDEX.md) — Vercel transcript index; currently waiting on exports.
 - [TRINITY_INSTALL_CATALOG.md](TRINITY_INSTALL_CATALOG.md) — repo and transcript status by evidence.
@@ -32,9 +42,23 @@ Start here for governance and coordination:
 
 ## Portfolio Multiverse CODEX prompt
 Use [`PORTFOLIO_MULTIVERSE_CODEX_PROMPT.md`](PORTFOLIO_MULTIVERSE_CODEX_PROMPT.md) as the paste-ready CODEX instruction set to build the WOW-first immersive lobby, Trinity Elevator, and registry-driven rooms with Akashic skipping in the WIRED CHAOS MAIN repository.
+## 3DT Consumer Model
+All projects ending in `-3DT` are consumers of the Wired Chaos platform. They rely on the platform runtime, registry, permissions, and environment; they do not replace or fork those systems. See:
+- [TRINITY_CONSUMERS.md](TRINITY_CONSUMERS.md) for the formal definition and boundaries.
+- [3DT_CONSUMER_CONTRACT.md](3DT_CONSUMER_CONTRACT.md) for the plain-language contract every `-3DT` project inherits.
+
 
 ## How uploads work
 Uploads are drop-only: place `.zip` files in `INBOX_UPLOADS/` via **Add file → Upload files**, commit, then let automation unpack, update docs, and open a PR. Check the latest **Ingest Vercel ZIP exports** run in the **Actions** tab and review the PR for extracted files and refreshed audit docs.
 
 - [UPLOAD_CONTRACT.md](UPLOAD_CONTRACT.md) — plain-language rules and what happens automatically.
 - [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) — step-by-step checks for upload, automation, verification, and merge.
+
+## 3DT Multiverse Overview
+CODEX operates as the truth layer holding manifests, contracts, and state. WIRED CHAOS is the execution layer enforcing runtime, security, and lifecycle. 3DT is the experiential layer that renders traversal for participants once conditions are satisfied. Users traverse patches non-linearly, hopping across hubs and timelines after clearing required gates, reflecting a multiverse of routes instead of a single linear application.
+
+## Development setup
+- Install dependencies with `pnpm`.
+- If your network blocks the default registry, pin npm to the public registry before installing: `npm config set registry https://registry.npmjs.org/`.
+- The repo includes a checked-in `.npmrc` with the same registry pin to keep installs consistent across environments.
+- If you need to consume scoped packages hosted on GitHub Packages, authenticate with your scope before installing: `npm login --scope=@yourScope --registry=https://npm.pkg.github.com`.
