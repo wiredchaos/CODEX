@@ -152,4 +152,26 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: oklch(0.8 0.15 195);
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  background: #000000;
+  color: #00ffff;
+}
+
+a {
+  color: #00ffff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }

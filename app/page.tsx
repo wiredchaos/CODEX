@@ -316,4 +316,8 @@ export default function Page() {
       </div>
     </div>
   )
+import IntakeProtocolPanel from "../components/IntakeProtocolPanel";
+
+export default function HomePage() {
+  return <IntakeProtocolPanel />;
 }
