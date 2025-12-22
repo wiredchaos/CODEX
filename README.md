@@ -34,6 +34,14 @@ The Next.js intake panel provides a 3DT job creator and live status console. Run
 - [TRINITY_REQUIRED_PIECES.md](TRINITY_REQUIRED_PIECES.md) — checklist placeholder for required components.
 - [TRINITY_GAPS_NEXT_ACTIONS.md](TRINITY_GAPS_NEXT_ACTIONS.md) — missing evidence and next documentation steps.
 
+## Portfolio Multiverse (non-developer view)
+- Open `portfolio_multiverse/index.html` locally or on a static host to enter the galaxy lobby immediately (no builds required).
+- Stars represent every `-3DT` patch from the registry; click a star to drop into its 3D room or open the Trinity Elevator to ride timelines.
+- Locks are enforced visually: soft-locked rooms glow amber, hard-locked rooms are hidden ghosts until your `user_state.json` meets the rules.
+- Rendering is STUB_RUNTIME-only; future engines can mount into the shared room container without changing patch content.
+
+## Portfolio Multiverse CODEX prompt
+Use [`PORTFOLIO_MULTIVERSE_CODEX_PROMPT.md`](PORTFOLIO_MULTIVERSE_CODEX_PROMPT.md) as the paste-ready CODEX instruction set to build the WOW-first immersive lobby, Trinity Elevator, and registry-driven rooms with Akashic skipping in the WIRED CHAOS MAIN repository.
 ## 3DT Consumer Model
 All projects ending in `-3DT` are consumers of the Wired Chaos platform. They rely on the platform runtime, registry, permissions, and environment; they do not replace or fork those systems. See:
 - [TRINITY_CONSUMERS.md](TRINITY_CONSUMERS.md) for the formal definition and boundaries.

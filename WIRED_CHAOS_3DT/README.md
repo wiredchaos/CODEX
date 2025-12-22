@@ -13,5 +13,10 @@ This directory anchors the non-destructive execution spine for the Wired Chaos `
 - **Metadata:** Every version captures the consumer name, timestamp, and version tag for traceability.
 - **Execution stance:** No rendering engine selection and no GPU assumptions are made here—this is orchestration only.
 
+## How a job becomes a render (execution spine)
+- **Register intake → job:** Use the `Wired Chaos 3DT pipeline` workflow to register an intake folder. Each registration creates `JOBS/<job-id>/versions/vXXXX/` with queued metadata.
+- **Execution workers:** Run `python scripts/wired_chaos_3dt_worker.py --watch --verbose` to watch `JOBS/`, claim queued jobs, and perform a deterministic **STUB_EXECUTION** placeholder render.
+- **Status transitions:** Metadata and manifests move `queued → running → completed` as the worker executes. Outputs stay non-destructive and versioned under each job.
+- **Consumer scope:** All projects ending in `-3DT` are treated as execution consumers; consumers only supply intake inputs, and Wired Chaos executes the pipeline.
 ## How to trigger
 Use the `Wired Chaos 3DT pipeline` workflow (manual dispatch) to register a job intake and emit the next placeholder version. The workflow updates manifests only; it does **not** perform rendering.

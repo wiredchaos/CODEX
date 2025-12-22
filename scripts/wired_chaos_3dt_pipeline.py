@@ -64,6 +64,23 @@ def _ensure_base_dirs() -> None:
         path.mkdir(parents=True, exist_ok=True)
 
 
+def _validate_segment(value: str, field: str) -> str:
+    candidate = value.strip()
+    if not candidate:
+        raise ValueError(f"{field} cannot be empty")
+
+    # Limit to safe folder name characters and forbid traversal tokens.
+    if "/" in candidate or "\\" in candidate or ".." in candidate:
+        raise ValueError(f"{field} contains invalid path separators or traversal sequences")
+
+    if not re.fullmatch(r"[A-Za-z0-9._-]+", candidate):
+        raise ValueError(
+            f"{field} must use alphanumeric characters, dots, underscores, or hyphens only"
+        )
+
+    return candidate
+
+
 def _prepare_job_dirs(job_id: str, version: str) -> Path:
     job_root = JOBS_DIR / job_id
     version_dir = job_root / "versions" / version
@@ -71,6 +88,7 @@ def _prepare_job_dirs(job_id: str, version: str) -> Path:
     return version_dir
 
 
+def _update_manifest(job_id: str, version: str, consumer: str, timestamp: str, notes: str, status: str) -> None:
 def _update_manifest(job_id: str, version: str, consumer: str, timestamp: str, notes: str) -> None:
     manifest = _load_manifest()
     manifest.setdefault("intake_root", str(INTAKE_DIR))
@@ -82,6 +100,7 @@ def _update_manifest(job_id: str, version: str, consumer: str, timestamp: str, n
         "version": version,
         "timestamp": timestamp,
         "consumer": consumer,
+        "status": status,
         "status": "placeholder",
         "notes": notes,
         "owned_by": "Wired Chaos",
@@ -125,6 +144,21 @@ def _write_version_metadata(version_dir: Path, metadata: Dict) -> None:
 
 
 def register_job(intake_id: str, consumer: str, requested_version: Optional[str], notes: str) -> str:
+    normalized_consumer = consumer.strip()
+    if not normalized_consumer.lower().endswith("-3dt"):
+        raise ValueError("consumer must end with '-3DT' to be treated as an execution consumer")
+
+    safe_intake_id = _validate_segment(intake_id, "intake_id")
+    safe_requested_version = None
+    if requested_version:
+        safe_requested_version = _validate_segment(requested_version, "requested version")
+
+    _ensure_base_dirs()
+    intake_path = INTAKE_DIR / safe_intake_id
+    intake_path.mkdir(parents=True, exist_ok=True)
+
+    existing_versions: List[str] = []
+    versions_dir = JOBS_DIR / safe_intake_id / "versions"
     _ensure_base_dirs()
     intake_path = INTAKE_DIR / intake_id
     intake_path.mkdir(parents=True, exist_ok=True)
@@ -135,6 +169,14 @@ def register_job(intake_id: str, consumer: str, requested_version: Optional[str]
         existing_versions = [p.name for p in versions_dir.iterdir() if p.is_dir()]
 
     version = _next_version(existing_versions, requested_version)
+    timestamp = dt.datetime.now(dt.UTC).isoformat(timespec="seconds") + "Z"
+    version = _validate_segment(_next_version(existing_versions, safe_requested_version), "version")
+    timestamp = dt.datetime.utcnow().isoformat(timespec="seconds") + "Z"
+
+    version_dir = _prepare_job_dirs(safe_intake_id, version)
+    metadata = {
+        "job_id": safe_intake_id,
+        "consumer": normalized_consumer,
     timestamp = dt.datetime.utcnow().isoformat(timespec="seconds") + "Z"
 
     version_dir = _prepare_job_dirs(intake_id, version)
@@ -147,6 +189,11 @@ def register_job(intake_id: str, consumer: str, requested_version: Optional[str]
         "owned_by": "Wired Chaos",
         "intake_mode": "job",
         "rendering": "pending",
+        "status": "queued",
+        "notes": notes,
+    }
+    _write_version_metadata(version_dir, metadata)
+    _update_manifest(safe_intake_id, version, normalized_consumer, timestamp, notes, status="queued")
         "notes": notes,
     }
     _write_version_metadata(version_dir, metadata)

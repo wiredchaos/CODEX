@@ -66,6 +66,24 @@ jobs:
           python-version: "3.11"
 
       - name: Register intake job
+        env:
+          INTAKE_ID: ${{ inputs.intake_id }}
+          CONSUMER: ${{ inputs.consumer }}
+          VERSION: ${{ inputs.version }}
+          NOTES: ${{ inputs.notes }}
+        run: |
+          python scripts/wired_chaos_3dt_pipeline.py \
+            --intake-id "$INTAKE_ID" \
+            --consumer "$CONSUMER" \
+            --version "$VERSION" \
+            --notes "$NOTES"
+
+      - name: Capture job version
+        id: summary
+        env:
+          INTAKE_ID: ${{ inputs.intake_id }}
+        run: |
+          VERSION=$(jq -r ".jobs[\"$INTAKE_ID\"].last_version" WIRED_CHAOS_3DT/_JOBS_MANIFEST.json)
         run: |
           python scripts/wired_chaos_3dt_pipeline.py \
             --intake-id "${{ inputs.intake_id }}" \
@@ -104,5 +122,10 @@ jobs:
             - Metadata recorded; rendering deliberately not executed
 
       - name: Log summary
+        env:
+          INTAKE_ID: ${{ inputs.intake_id }}
+          CONSUMER: ${{ inputs.consumer }}
+        run: |
+          echo "Registered $INTAKE_ID for $CONSUMER at version ${{ steps.summary.outputs.version }} (placeholders only)."
         run: |
           echo "Registered ${{ inputs.intake_id }} for ${{ inputs.consumer }} at version ${{ steps.summary.outputs.version }} (placeholders only)."
