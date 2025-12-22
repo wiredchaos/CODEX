@@ -1,6 +1,18 @@
 name: Wired Chaos 3DT pipeline
 
 on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  quality-gate:
+    name: Lint & typecheck
   workflow_dispatch:
     inputs:
       intake_id:
@@ -31,6 +43,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -55,6 +84,17 @@ jobs:
           INTAKE_ID: ${{ inputs.intake_id }}
         run: |
           VERSION=$(jq -r ".jobs[\"$INTAKE_ID\"].last_version" WIRED_CHAOS_3DT/_JOBS_MANIFEST.json)
+        run: |
+          python scripts/wired_chaos_3dt_pipeline.py \
+            --intake-id "${{ inputs.intake_id }}" \
+            --consumer "${{ inputs.consumer }}" \
+            --version "${{ inputs.version }}" \
+            --notes "${{ inputs.notes }}"
+
+      - name: Capture job version
+        id: summary
+        run: |
+          VERSION=$(jq -r ".jobs[\"${{ inputs.intake_id }}\"].last_version" WIRED_CHAOS_3DT/_JOBS_MANIFEST.json)
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Detect changes
@@ -87,3 +127,5 @@ jobs:
           CONSUMER: ${{ inputs.consumer }}
         run: |
           echo "Registered $INTAKE_ID for $CONSUMER at version ${{ steps.summary.outputs.version }} (placeholders only)."
+        run: |
+          echo "Registered ${{ inputs.intake_id }} for ${{ inputs.consumer }} at version ${{ steps.summary.outputs.version }} (placeholders only)."

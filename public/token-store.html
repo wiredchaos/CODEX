@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WIRED CHAOS Token Store</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 24px;
+        background: #0b0b0f;
+        color: #f3f3f5;
+      }
+      h1 {
+        color: #61dafb;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+      }
+      .card {
+        border: 1px solid #1f1f2b;
+        padding: 16px;
+        border-radius: 8px;
+        background: #13131a;
+      }
+      button {
+        background: #61dafb;
+        border: none;
+        color: #0b0b0f;
+        padding: 10px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      #ledger {
+        font-size: 13px;
+      }
+      .spend {
+        margin-top: 24px;
+        padding: 16px;
+        border: 1px dashed #2b2b37;
+        border-radius: 8px;
+      }
+      label {
+        display: block;
+        margin-bottom: 6px;
+      }
+      input, select {
+        padding: 8px;
+        width: 100%;
+        margin-bottom: 12px;
+        border-radius: 6px;
+        border: 1px solid #2b2b37;
+        background: #0f0f18;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Token Store</h1>
+    <p>FIAT in → WC Tokens out. All in-app economy rides the token rail.</p>
+    <div>
+      <label for="userId">User ID</label>
+      <input id="userId" placeholder="user-123" value="demo-user" />
+    </div>
+    <section>
+      <h2>Token Packs</h2>
+      <div id="packs" class="grid"></div>
+    </section>
+
+    <section class="spend">
+      <h2>Spend Tokens (dev/admin demo)</h2>
+      <label for="spend-amount">Amount</label>
+      <input id="spend-amount" type="number" value="50" />
+      <label for="reason">Reason Code</label>
+      <input id="reason" value="dev_demo" />
+      <button id="spend">Spend</button>
+      <p id="spend-result"></p>
+    </section>
+
+    <section>
+      <h2>Balance</h2>
+      <p id="balance">Loading...</p>
+      <div id="ledger"></div>
+    </section>
+
+    <script>
+      async function fetchPacks() {
+        const res = await fetch('/api/token-packs');
+        const packs = await res.json();
+        const container = document.getElementById('packs');
+        container.innerHTML = '';
+        packs.forEach((pack) => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <h3>${pack.name}</h3>
+            <p>${pack.tokens} tokens</p>
+            <p>$${(pack.priceFiatCents / 100).toFixed(2)} ${pack.fiatCurrency}</p>
+            <p>${pack.description || ''}</p>
+            <button data-pack="${pack.id}">Buy Tokens</button>
+          `;
+          card.querySelector('button').addEventListener('click', () => startCheckout(pack.id));
+          container.appendChild(card);
+        });
+      }
+
+      async function startCheckout(packId) {
+        const userId = (document.getElementById('userId')).value;
+        const res = await fetch('/api/checkout/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tokenPackId: packId, returnUrl: window.location.href, userId })
+        });
+        const data = await res.json();
+        if (data.checkoutUrl) {
+          window.alert('Redirecting to checkout: ' + data.checkoutUrl);
+        } else {
+          window.alert('Checkout failed: ' + data.error);
+        }
+      }
+
+      async function loadBalance() {
+        const userId = (document.getElementById('userId')).value;
+        const res = await fetch(`/api/tokens/balance?userId=${encodeURIComponent(userId)}`);
+        const data = await res.json();
+        document.getElementById('balance').innerText = `Balance: ${data.balance} ${'WC_TOKEN'}`;
+        const ledgerDiv = document.getElementById('ledger');
+        ledgerDiv.innerHTML = '<h3>Recent ledger</h3>' +
+          data.ledger
+            .map((entry) => `<div>${entry.type} — ${entry.amount} (${entry.reasonCode})</div>`)
+            .join('');
+      }
+
+      async function spend() {
+        const userId = (document.getElementById('userId')).value;
+        const amount = Number((document.getElementById('spend-amount')).value);
+        const reason = (document.getElementById('reason')).value;
+        const res = await fetch('/api/tokens/spend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, amount, reasonCode: reason })
+        });
+        const data = await res.json();
+        document.getElementById('spend-result').innerText = data.error
+          ? data.error
+          : `Spent. New balance: ${data.balance}`;
+        loadBalance();
+      }
+
+      document.getElementById('spend').addEventListener('click', spend);
+      document.getElementById('userId').addEventListener('change', loadBalance);
+      fetchPacks().then(loadBalance);
+    </script>
+  </body>
+</html>

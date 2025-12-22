@@ -89,6 +89,7 @@ def _prepare_job_dirs(job_id: str, version: str) -> Path:
 
 
 def _update_manifest(job_id: str, version: str, consumer: str, timestamp: str, notes: str, status: str) -> None:
+def _update_manifest(job_id: str, version: str, consumer: str, timestamp: str, notes: str) -> None:
     manifest = _load_manifest()
     manifest.setdefault("intake_root", str(INTAKE_DIR))
     manifest.setdefault("jobs", {})
@@ -100,6 +101,7 @@ def _update_manifest(job_id: str, version: str, consumer: str, timestamp: str, n
         "timestamp": timestamp,
         "consumer": consumer,
         "status": status,
+        "status": "placeholder",
         "notes": notes,
         "owned_by": "Wired Chaos",
         "rendering": "pending",
@@ -157,6 +159,12 @@ def register_job(intake_id: str, consumer: str, requested_version: Optional[str]
 
     existing_versions: List[str] = []
     versions_dir = JOBS_DIR / safe_intake_id / "versions"
+    _ensure_base_dirs()
+    intake_path = INTAKE_DIR / intake_id
+    intake_path.mkdir(parents=True, exist_ok=True)
+
+    existing_versions: List[str] = []
+    versions_dir = JOBS_DIR / intake_id / "versions"
     if versions_dir.exists():
         existing_versions = [p.name for p in versions_dir.iterdir() if p.is_dir()]
 
@@ -169,6 +177,12 @@ def register_job(intake_id: str, consumer: str, requested_version: Optional[str]
     metadata = {
         "job_id": safe_intake_id,
         "consumer": normalized_consumer,
+    timestamp = dt.datetime.utcnow().isoformat(timespec="seconds") + "Z"
+
+    version_dir = _prepare_job_dirs(intake_id, version)
+    metadata = {
+        "job_id": intake_id,
+        "consumer": consumer,
         "version": version,
         "timestamp": timestamp,
         "intake_path": str(intake_path),
@@ -180,6 +194,10 @@ def register_job(intake_id: str, consumer: str, requested_version: Optional[str]
     }
     _write_version_metadata(version_dir, metadata)
     _update_manifest(safe_intake_id, version, normalized_consumer, timestamp, notes, status="queued")
+        "notes": notes,
+    }
+    _write_version_metadata(version_dir, metadata)
+    _update_manifest(intake_id, version, consumer, timestamp, notes)
     return version
 
 
