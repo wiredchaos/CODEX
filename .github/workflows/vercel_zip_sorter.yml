@@ -1,0 +1,99 @@
+name: Vercel ZIP sorter
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'INBOX_UPLOADS/**'
+      - '*.zip'
+
+jobs:
+  sort-vercel-zips:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+name: Auto-sort Vercel ZIP uploads
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "INBOX_UPLOADS/**"
+      - "*.zip"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sort-zips:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Sort ZIP uploads
+        run: |
+          python scripts/vercel_zip_sorter.py
+
+      - name: Check for changes
+        id: git_status
+          python-version: "3.11"
+
+      - name: Run sorter
+        run: python scripts/vercel_zip_sorter.py
+
+      - name: Detect changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create pull request branch
+        if: steps.git_status.outputs.changed == 'true'
+        id: create_branch
+        run: |
+          branch="auto/vercel-zip-sorter-${{ github.run_id }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add -A
+          git commit -m "chore: auto-sort Vercel zips"
+          git push "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" "$branch"
+          echo "branch=$branch" >> $GITHUB_OUTPUT
+
+      - name: Open pull request
+        if: steps.git_status.outputs.changed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --title "chore: auto-sort Vercel zips into VERCEL_HISTORY" \
+            --body "Automation only. No lore changes. Anti-Moloch compliant." \
+            --base main \
+            --head "${{ steps.create_branch.outputs.branch }}"
+      - name: Create PR
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "chore: auto-sort Vercel zips into VERCEL_HISTORY"
+          commit-message: "chore: auto-sort Vercel zip uploads"
+          branch: "automation/vercel-zip-sorter"
+          delete-branch: true
+          body: |
+            Automation only. No lore changes. Anti-Moloch compliant.
+            - Moves uploaded ZIPs into VERCEL_HISTORY/{exports,3dt,builds,misc}
+            - Updates VERCEL_HISTORY/exports/_MANIFEST.json

@@ -1,0 +1,131 @@
+name: Wired Chaos 3DT pipeline
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  quality-gate:
+    name: Lint & typecheck
+  workflow_dispatch:
+    inputs:
+      intake_id:
+        description: "Intake job folder inside WIRED_CHAOS_3DT/INTAKE"
+        required: true
+        type: string
+      consumer:
+        description: "Name of the -3DT consumer supplying inputs"
+        required: true
+        type: string
+      version:
+        description: "Optional explicit version tag (e.g., v0002). Leave blank for next incremental version."
+        required: false
+        type: string
+      notes:
+        description: "Optional notes captured in metadata"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  register-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Register intake job
+        env:
+          INTAKE_ID: ${{ inputs.intake_id }}
+          CONSUMER: ${{ inputs.consumer }}
+          VERSION: ${{ inputs.version }}
+          NOTES: ${{ inputs.notes }}
+        run: |
+          python scripts/wired_chaos_3dt_pipeline.py \
+            --intake-id "$INTAKE_ID" \
+            --consumer "$CONSUMER" \
+            --version "$VERSION" \
+            --notes "$NOTES"
+
+      - name: Capture job version
+        id: summary
+        env:
+          INTAKE_ID: ${{ inputs.intake_id }}
+        run: |
+          VERSION=$(jq -r ".jobs[\"$INTAKE_ID\"].last_version" WIRED_CHAOS_3DT/_JOBS_MANIFEST.json)
+        run: |
+          python scripts/wired_chaos_3dt_pipeline.py \
+            --intake-id "${{ inputs.intake_id }}" \
+            --consumer "${{ inputs.consumer }}" \
+            --version "${{ inputs.version }}" \
+            --notes "${{ inputs.notes }}"
+
+      - name: Capture job version
+        id: summary
+        run: |
+          VERSION=$(jq -r ".jobs[\"${{ inputs.intake_id }}\"].last_version" WIRED_CHAOS_3DT/_JOBS_MANIFEST.json)
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Detect changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create PR
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "chore: register 3DT intake ${{ inputs.intake_id }}"
+          commit-message: "chore: register 3DT intake ${{ inputs.intake_id }}"
+          branch: "automation/3dt-intake-${{ inputs.intake_id }}"
+          delete-branch: true
+          body: |
+            Execution spine only. Wired Chaos owns runs; -3DT consumers supply inputs.
+            - Intake folder: WIRED_CHAOS_3DT/INTAKE/${{ inputs.intake_id }}
+            - Consumer: ${{ inputs.consumer }}
+            - Version: ${{ steps.summary.outputs.version }}
+            - Metadata recorded; rendering deliberately not executed
+
+      - name: Log summary
+        env:
+          INTAKE_ID: ${{ inputs.intake_id }}
+          CONSUMER: ${{ inputs.consumer }}
+        run: |
+          echo "Registered $INTAKE_ID for $CONSUMER at version ${{ steps.summary.outputs.version }} (placeholders only)."
+        run: |
+          echo "Registered ${{ inputs.intake_id }} for ${{ inputs.consumer }} at version ${{ steps.summary.outputs.version }} (placeholders only)."
