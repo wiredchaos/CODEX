@@ -93,47 +93,44 @@ def _update_manifest_status(job_id: str, version: str, status: str, timestamp: s
     with MANIFEST_PATH.open("r+", encoding="utf-8") as fh:
         # Acquire exclusive lock - blocks until available
         fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        
+        # Read current manifest state
+        fh.seek(0)
         try:
-            # Read current manifest state
+            manifest = json.load(fh)
+        except json.JSONDecodeError:
+            manifest = {"jobs": {}}
+        
+        jobs = manifest.get("jobs", {})
+        job_record = jobs.get(job_id)
+        if not job_record:
+            return
+        
+        updated = False
+        for entry in job_record.get("versions", []):
+            if entry.get("version") == version:
+                entry["status"] = status
+                if status == STATUS_RUNNING:
+                    entry["started_at"] = timestamp
+                elif status == STATUS_COMPLETED:
+                    entry["completed_at"] = timestamp
+                    entry["rendering"] = "STUB_EXECUTION"
+                elif status == STATUS_FAILED:
+                    entry["failed_at"] = timestamp
+                    entry["rendering"] = "STUB_EXECUTION"
+                    if error:
+                        entry["error"] = error
+                updated = True
+                break
+        
+        if updated:
+            # Write back to locked file handle
             fh.seek(0)
-            try:
-                manifest = json.load(fh)
-            except json.JSONDecodeError:
-                manifest = {"jobs": {}}
-            
-            jobs = manifest.get("jobs", {})
-            job_record = jobs.get(job_id)
-            if not job_record:
-                return
-            
-            updated = False
-            for entry in job_record.get("versions", []):
-                if entry.get("version") == version:
-                    entry["status"] = status
-                    if status == STATUS_RUNNING:
-                        entry["started_at"] = timestamp
-                    elif status == STATUS_COMPLETED:
-                        entry["completed_at"] = timestamp
-                        entry["rendering"] = "STUB_EXECUTION"
-                    elif status == STATUS_FAILED:
-                        entry["failed_at"] = timestamp
-                        entry["rendering"] = "STUB_EXECUTION"
-                        if error:
-                            entry["error"] = error
-                    updated = True
-                    break
-            
-            if updated:
-                # Write back atomically
-                fh.seek(0)
-                fh.truncate()
-                json.dump(manifest, fh, indent=2, sort_keys=True)
-                fh.write("\n")
-                fh.flush()
-                os.fsync(fh.fileno())
-        finally:
-            # Lock is automatically released when file is closed
-            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+            fh.truncate()
+            json.dump(manifest, fh, indent=2, sort_keys=True)
+            fh.write("\n")
+            fh.flush()
+            os.fsync(fh.fileno())
 
 
 def _claim_job(metadata_path: Path) -> Optional[Dict]:
