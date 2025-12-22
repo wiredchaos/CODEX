@@ -5,6 +5,10 @@ This worker scans the JOBS directory for pending 3DT jobs, claims them,
 performs a deterministic STUB_EXECUTION placeholder render, and advances
 status tracking (pending -> running -> completed/failed). Rendering
 remains mocked; this only operationalizes the first execution hop.
+This worker scans the JOBS directory for queued 3DT jobs, claims them,
+performs a deterministic STUB_EXECUTION placeholder render, and advances
+status tracking (queued -> running -> completed). Rendering remains
+mocked; this only operationalizes the first execution hop.
 """
 
 from __future__ import annotations
@@ -27,6 +31,9 @@ STATUS_QUEUED = "queued"  # legacy alias for pending
 STATUS_RUNNING = "running"
 STATUS_COMPLETED = "completed"
 STATUS_FAILED = "failed"
+STATUS_QUEUED = "queued"
+STATUS_RUNNING = "running"
+STATUS_COMPLETED = "completed"
 
 
 def _load_json(path: Path) -> Dict:
@@ -131,6 +138,32 @@ def _update_manifest_status(job_id: str, version: str, status: str, timestamp: s
             fh.write("\n")
             fh.flush()
             os.fsync(fh.fileno())
+def _update_manifest_status(job_id: str, version: str, status: str, timestamp: str) -> None:
+    manifest = _load_json(MANIFEST_PATH)
+    jobs = manifest.get("jobs", {})
+    job_record = jobs.get(job_id)
+    if not job_record:
+        return
+
+    updated = False
+    for entry in job_record.get("versions", []):
+        if entry.get("version") == version:
+            entry["status"] = status
+            if status == STATUS_RUNNING:
+                entry["started_at"] = timestamp
+            elif status == STATUS_COMPLETED:
+                entry["completed_at"] = timestamp
+                entry["rendering"] = "STUB_EXECUTION"
+            elif status == STATUS_FAILED:
+                entry["failed_at"] = timestamp
+                entry["rendering"] = "STUB_EXECUTION"
+                if error:
+                    entry["error"] = error
+            updated = True
+            break
+
+    if updated:
+        _save_json(MANIFEST_PATH, manifest)
 
 
 def _claim_job(metadata_path: Path) -> Optional[Dict]:
@@ -143,6 +176,33 @@ def _claim_job(metadata_path: Path) -> Optional[Dict]:
     _save_json(metadata_path, metadata)
     _update_manifest_status(metadata["job_id"], metadata["version"], STATUS_RUNNING, metadata["started_at"])
     return metadata
+    lock_path = metadata_path.with_suffix(".lock")
+    try:
+        lock_path.open("x").close()
+    except FileExistsError:
+        # Another worker is already claiming or processing this job.
+        return None
+
+    metadata["status"] = STATUS_RUNNING
+    metadata["started_at"] = dt.datetime.now(dt.UTC).isoformat(timespec="seconds") + "Z"
+    _save_json(metadata_path, metadata)
+    _update_manifest_status(metadata["job_id"], metadata["version"], STATUS_RUNNING, metadata["started_at"])
+    return metadata
+    try:
+        metadata = _load_json(metadata_path)
+        if metadata.get("status") != STATUS_QUEUED:
+            return None
+
+        metadata["status"] = STATUS_RUNNING
+        metadata["started_at"] = dt.datetime.utcnow().isoformat(timespec="seconds") + "Z"
+        _save_json(metadata_path, metadata)
+        _update_manifest_status(
+            metadata["job_id"], metadata["version"], STATUS_RUNNING, metadata["started_at"]
+        )
+        return metadata
+    finally:
+        if lock_path.exists():
+            lock_path.unlink()
 
 
 def _complete_job(metadata_path: Path, metadata: Dict) -> None:
@@ -164,6 +224,7 @@ def _complete_job(metadata_path: Path, metadata: Dict) -> None:
 
     metadata["status"] = STATUS_COMPLETED
     metadata["completed_at"] = dt.datetime.utcnow().isoformat(timespec="seconds") + "Z"
+    metadata["completed_at"] = dt.datetime.now(dt.UTC).isoformat(timespec="seconds") + "Z"
     metadata["rendering"] = "STUB_EXECUTION"
     _save_json(metadata_path, metadata)
     _update_manifest_status(metadata["job_id"], metadata["version"], STATUS_COMPLETED, metadata["completed_at"])
@@ -182,6 +243,10 @@ def _next_queued_job() -> Optional[Tuple[Dict, Path]]:
     for job_id, version, metadata_path in _iter_version_metadata():
         metadata = _load_json(metadata_path)
         if metadata.get("status") in {STATUS_PENDING, STATUS_QUEUED}:
+def _next_queued_job() -> Optional[Tuple[Dict, Path]]:
+    for job_id, version, metadata_path in _iter_version_metadata():
+        metadata = _load_json(metadata_path)
+        if metadata.get("status") == STATUS_QUEUED:
             return metadata, metadata_path
     return None
 
@@ -214,6 +279,10 @@ def run_once(verbose: bool = False) -> bool:
         if verbose:
             print(f"Job failed: {exc}")
         return False
+    _complete_job(path, claimed)
+    if verbose:
+        print("Job completed.")
+    return True
 
 
 def run_loop(poll_seconds: float, verbose: bool = False) -> None:

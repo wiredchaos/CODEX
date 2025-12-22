@@ -25,4 +25,12 @@ jobs:
           python scripts/wired_chaos_3dt_worker.py \
             $( [ "${{ github.event.inputs.watch }}" = "true" ] && echo --watch ) \
             --poll-seconds "${{ github.event.inputs.poll_seconds }}" \
+        env:
+          WATCH: ${{ github.event.inputs.watch }}
+          POLL_SECONDS: ${{ github.event.inputs.poll_seconds }}
+        run: |
+          python -m pip install --upgrade pip
+          python scripts/wired_chaos_3dt_worker.py \
+            $( [ "$WATCH" = "true" ] && echo --watch ) \
+            --poll-seconds "$POLL_SECONDS" \
             --verbose
