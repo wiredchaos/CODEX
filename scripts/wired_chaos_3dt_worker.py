@@ -11,7 +11,9 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import fcntl
 import json
+import os
 import time
 from pathlib import Path
 from typing import Dict, Iterable, Optional, Tuple
@@ -44,6 +46,22 @@ def _save_json(path: Path, payload: Dict) -> None:
         fh.write("\n")
 
 
+def _save_json_atomic(path: Path, payload: Dict) -> None:
+    """Save JSON atomically using temp file + rename to prevent partial writes."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = path.parent / f".{path.name}.tmp.{os.getpid()}"
+    try:
+        with temp_path.open("w", encoding="utf-8") as fh:
+            json.dump(payload, fh, indent=2, sort_keys=True)
+            fh.write("\n")
+            fh.flush()
+            os.fsync(fh.fileno())
+        temp_path.replace(path)
+    finally:
+        if temp_path.exists():
+            temp_path.unlink()
+
+
 def _iter_version_metadata() -> Iterable[Tuple[str, str, Path]]:
     if not JOBS_DIR.exists():
         return []
@@ -59,31 +77,63 @@ def _iter_version_metadata() -> Iterable[Tuple[str, str, Path]]:
 
 
 def _update_manifest_status(job_id: str, version: str, status: str, timestamp: str, error: Optional[str] = None) -> None:
-    manifest = _load_json(MANIFEST_PATH)
-    jobs = manifest.get("jobs", {})
-    job_record = jobs.get(job_id)
-    if not job_record:
-        return
-
-    updated = False
-    for entry in job_record.get("versions", []):
-        if entry.get("version") == version:
-            entry["status"] = status
-            if status == STATUS_RUNNING:
-                entry["started_at"] = timestamp
-            elif status == STATUS_COMPLETED:
-                entry["completed_at"] = timestamp
-                entry["rendering"] = "STUB_EXECUTION"
-            elif status == STATUS_FAILED:
-                entry["failed_at"] = timestamp
-                entry["rendering"] = "STUB_EXECUTION"
-                if error:
-                    entry["error"] = error
-            updated = True
-            break
-
-    if updated:
-        _save_json(MANIFEST_PATH, manifest)
+    """Update manifest status with file locking to prevent race conditions.
+    
+    Uses exclusive file locking to ensure that only one worker can update
+    the manifest at a time, preventing concurrent workers from overwriting
+    each other's changes.
+    """
+    MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Create manifest file if it doesn't exist
+    if not MANIFEST_PATH.exists():
+        _save_json_atomic(MANIFEST_PATH, {"jobs": {}})
+    
+    # Open manifest file with exclusive lock
+    with MANIFEST_PATH.open("r+", encoding="utf-8") as fh:
+        # Acquire exclusive lock - blocks until available
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            # Read current manifest state
+            fh.seek(0)
+            try:
+                manifest = json.load(fh)
+            except json.JSONDecodeError:
+                manifest = {"jobs": {}}
+            
+            jobs = manifest.get("jobs", {})
+            job_record = jobs.get(job_id)
+            if not job_record:
+                return
+            
+            updated = False
+            for entry in job_record.get("versions", []):
+                if entry.get("version") == version:
+                    entry["status"] = status
+                    if status == STATUS_RUNNING:
+                        entry["started_at"] = timestamp
+                    elif status == STATUS_COMPLETED:
+                        entry["completed_at"] = timestamp
+                        entry["rendering"] = "STUB_EXECUTION"
+                    elif status == STATUS_FAILED:
+                        entry["failed_at"] = timestamp
+                        entry["rendering"] = "STUB_EXECUTION"
+                        if error:
+                            entry["error"] = error
+                    updated = True
+                    break
+            
+            if updated:
+                # Write back atomically
+                fh.seek(0)
+                fh.truncate()
+                json.dump(manifest, fh, indent=2, sort_keys=True)
+                fh.write("\n")
+                fh.flush()
+                os.fsync(fh.fileno())
+        finally:
+            # Lock is automatically released when file is closed
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
 
 
 def _claim_job(metadata_path: Path) -> Optional[Dict]:
