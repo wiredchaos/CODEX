@@ -6,13 +6,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  reactStrictMode: true,
+  experimental: {
+    typedRoutes: true,
+  },
 }
 
 export default nextConfig
-  reactStrictMode: true,
-  experimental: {
-    typedRoutes: true
-  }
-};
-
-export default nextConfig;
