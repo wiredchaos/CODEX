@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { WcmLink } from "../../../components/wcm/WcmLink";
 import { WcmNavPanel } from "../../../components/wcm/WcmNavPanel";
 import { useSearchParams } from "next/navigation";
 import { getLabyrinthEntryNodeId } from "../../../lib/labyrinth/engine";
 
-export default function FenLabyrinthPage() {
+export const dynamic = "force-dynamic"
+
+function FenLabyrinthInner() {
   const params = useSearchParams();
   const [prompt, setPrompt] = useState("");
   const [gateMessage, setGateMessage] = useState("Provide a prompt to begin.");
@@ -74,4 +76,12 @@ export default function FenLabyrinthPage() {
       <WcmNavPanel currentRoute="/fen/labyrinth" />
     </main>
   );
+}
+
+export default function FenLabyrinthPage() {
+  return (
+    <Suspense fallback={<main>Loading…</main>}>
+      <FenLabyrinthInner />
+    </Suspense>
+  )
 }
