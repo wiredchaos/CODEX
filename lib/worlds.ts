@@ -10,7 +10,11 @@ export function listWorlds(): WorldStatus[] {
   initializeRegistry()
   const registry = getAllPatches()
 
-  return HUB_CONFIG.patches.map((patch) => {
+  // Worlds are renderable 3DT destinations only.
+  // Services (e.g. telemetry) must never appear as navigable worlds.
+  const renderableWorldPatches = HUB_CONFIG.patches.filter((patch) => patch.mount.startsWith("/world/"))
+
+  return renderableWorldPatches.map((patch) => {
     const manifest = registry.find((entry) => entry.id === patch.id)
     const compliance: "ok" | "warn" | "fail" = manifest
       ? manifest.timelineAccess === "granted"
