@@ -14,8 +14,6 @@ import {
   type TimelineAccess,
   canTransitionFloor,
   getFloorConfig,
-  SIGNAL_DUEL_MOUNT,
-  CLEAR_MOUNT, // Import CLEAR_MOUNT
 } from "@/lib/trinity-mount"
 import { initializeRegistry } from "@/lib/patch-registry"
 import { emitTelemetry } from "@/lib/telemetry-bus"
@@ -185,39 +183,3 @@ export function useTrinity(): TrinityContext {
 
   return context
 }
-
-export const CONSUMERS = {
-  SIGNAL_DUEL: {
-    patchId: SIGNAL_DUEL_MOUNT.patchId,
-    mount: SIGNAL_DUEL_MOUNT.mount,
-    requestedFloor: SIGNAL_DUEL_MOUNT.trinityFloor,
-    timelineAccess: {
-      level: "read" as const,
-      governor: "AKIRA_CODEX" as const,
-      redacted: false,
-    },
-    declares: {
-      no3DGeneration: true,
-      noGalaxyCreation: true,
-      trinityReadOnly: true,
-      timelineGovernor: "AKIRA_CODEX",
-    },
-  } satisfies TrinityConsumer,
-
-  CLEAR: {
-    patchId: CLEAR_MOUNT.patchId,
-    mount: CLEAR_MOUNT.mount,
-    requestedFloor: CLEAR_MOUNT.trinityFloor,
-    timelineAccess: {
-      level: "read" as const,
-      governor: "AKIRA_CODEX" as const,
-      redacted: false,
-    },
-    declares: {
-      no3DGeneration: true,
-      noGalaxyCreation: true,
-      trinityReadOnly: true,
-      timelineGovernor: "AKIRA_CODEX",
-    },
-  } satisfies TrinityConsumer,
-} as const

@@ -1,4 +1,5 @@
-import { TrinityProvider, CONSUMERS } from "@/components/trinity-provider"
+import { TrinityProvider } from "@/components/trinity-provider"
+import { CONSUMERS } from "@/lib/trinity-consumers"
 import type { ReactNode } from "react"
 
 // SIGNAL_DUEL wraps its content in TrinityProvider
