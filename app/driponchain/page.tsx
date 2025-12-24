@@ -1,6 +1,8 @@
 import { WcmNavPanel } from "../../components/wcm/WcmNavPanel";
 import { WcmLink } from "../../components/wcm/WcmLink";
 
+export const dynamic = "force-dynamic"
+
 export default function DripOnChainPage() {
   return (
     <main>

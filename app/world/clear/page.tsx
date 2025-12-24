@@ -1,5 +1,7 @@
 "use client"
 
+export const dynamic = "force-dynamic"
+
 import { useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { EnvironmentRenderer, type Hotspot, type HUDElement } from "@/components/environment-renderer"

@@ -81,7 +81,7 @@ export function useTelemetry() {
 
   return {
     events: data?.events ?? [],
-    hemisphereScore: data?.hemisphereScore ?? { business: 0, akashic: 0, bridge: 0, total: 0 },
+    hemisphereScore: data?.hemisphereScore ?? { business: 0, akashic: 0, bridge: 0, total: 0, balance: 0 },
     trackPatchAccess,
     trackRealmTransition,
     trackFirewallCheck,
