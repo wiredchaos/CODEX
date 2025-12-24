@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { WcmLink } from "../../components/wcm/WcmLink";
 import { WcmNavPanel } from "../../components/wcm/WcmNavPanel";
 import { useSearchParams } from "next/navigation";
 
-export default function NpcPromptCommandPage() {
+export const dynamic = "force-dynamic"
+
+function NpcPromptCommandInner() {
   const params = useSearchParams();
   const [prompt, setPrompt] = useState("");
   const [nextNodes, setNextNodes] = useState<any[]>([]);
@@ -75,4 +77,12 @@ export default function NpcPromptCommandPage() {
       <WcmNavPanel currentRoute="/npc-prompt-command" />
     </main>
   );
+}
+
+export default function NpcPromptCommandPage() {
+  return (
+    <Suspense fallback={<main>Loading…</main>}>
+      <NpcPromptCommandInner />
+    </Suspense>
+  )
 }
