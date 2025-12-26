@@ -2,7 +2,13 @@
 
 import useSWR from "swr"
 import { HUB_CONFIG, type PatchConfig, type RealmType } from "@/lib/hub-config"
-import { emitTelemetry, getRecentEvents, calculateHemisphereScore, startSession } from "@/lib/telemetry-bus"
+import {
+  emitTelemetry,
+  getRecentEvents,
+  calculateHemisphereScore,
+  startSession,
+  subscribeToTelemetry,
+} from "@/lib/telemetry-bus"
 import { useEffect, useCallback, useMemo } from "react"
 
 // Hub state fetcher
@@ -43,6 +49,15 @@ export function useTelemetry() {
     refreshInterval: 5000, // Refresh every 5 seconds
     revalidateOnFocus: false,
   })
+
+  useEffect(() => {
+    const unsubscribe = subscribeToTelemetry(() => {
+      // Background telemetry dispatch should never affect navigation or mounted worlds
+      mutate()
+    })
+
+    return unsubscribe
+  }, [mutate])
 
   const trackPatchAccess = useCallback(
     (patch: PatchConfig) => {
