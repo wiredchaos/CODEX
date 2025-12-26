@@ -152,6 +152,8 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: oklch(0.8 0.15 195);
+}
+
 :root {
   color-scheme: dark;
 }

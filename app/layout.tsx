@@ -1,11 +1,10 @@
-import type React from "react"
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Inter, JetBrains_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-const _geist = Geist({ subsets: ["latin"] })
-const _geistMono = Geist_Mono({ subsets: ["latin"] })
+const appSans = Inter({ subsets: ["latin"], variable: "--font-app-sans" })
+const appMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-app-mono" })
 
 export const metadata: Metadata = {
   title: "WIRED CHAOS META HUB | Galaxy Orchestrator",
@@ -20,35 +19,13 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`font-sans antialiased`}>
+      <body className={`${appSans.variable} ${appMono.variable} font-sans antialiased`}>
         {children}
         <Analytics />
       </body>
     </html>
   )
-import type { Metadata } from "next";
-import "./globals.css";
-
-export const metadata: Metadata = {
-  title: "WIRED CHAOS Intake Protocol",
-  description: "3DT job intake and live status console"
-};
-
-export default function RootLayout({
-  children
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
 }

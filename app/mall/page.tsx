@@ -2,6 +2,8 @@ import { TrinityConsumerMount } from "../../components/trinity/TrinityConsumerMo
 import { WcmLink } from "../../components/wcm/WcmLink";
 import { WcmNavPanel } from "../../components/wcm/WcmNavPanel";
 
+export const dynamic = "force-dynamic"
+
 export default function MallPage() {
   return (
     <main>
