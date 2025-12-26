@@ -1,6 +1,6 @@
 // Global Telemetry Bus for WIRED CHAOS META
-// Background-only service module: MUST NOT trigger navigation or unmount UI.
-// Handles cross-patch event tracking and hemisphere scoring.
+// Handles cross-patch event tracking and hemisphere scoring as a background service
+// NOTE: This module MUST NOT trigger navigation or world transitions; it only emits data events.
 
 // Keep known event types for autocomplete, but allow arbitrary string literals
 // (many patches emit custom event names).
@@ -24,6 +24,7 @@ export type TelemetryEventType =
   | "arcade_play"
   | "bridge_connect"
   | "echo_resonance"
+  | "telemetry_background" // service-only event to enforce background operation
   | (string & {})
 
 export interface TelemetryEvent {
@@ -56,6 +57,7 @@ export type TelemetryEventInput =
 // In-memory event buffer (would connect to Redis/Supabase in production)
 const eventBuffer: TelemetryEvent[] = []
 const MAX_BUFFER_SIZE = 1000
+const telemetryEmitter = new EventTarget()
 
 // Async dispatch queue (prevents telemetry from blocking render paths)
 const pendingQueue: TelemetryEvent[] = []
@@ -120,10 +122,69 @@ const HEMISPHERE_WEIGHTS = {
   echo_resonance: 50,
 }
 
+type TelemetryPayload = {
+  type: TelemetryEventType
+  patchId?: string
+  realm?: string
+  userId?: string
+  metadata?: Record<string, unknown>
+}
+
+type TelemetryOptions = Omit<TelemetryPayload, "type">
+
 function generateEventId(): string {
   return `evt_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
 }
 
+function writeEvent(event: TelemetryEvent) {
+  eventBuffer.push(event)
+
+  // Maintain buffer size
+  if (eventBuffer.length > MAX_BUFFER_SIZE) {
+    eventBuffer.shift()
+  }
+}
+
+function dispatchAsync(event: TelemetryEvent) {
+  queueMicrotask(() => {
+    telemetryEmitter.dispatchEvent(new CustomEvent("telemetry", { detail: event }))
+
+    // Log to console in development
+    if (process.env.NODE_ENV === "development") {
+      console.log(`[TELEMETRY] ${event.type}`, event)
+    }
+  })
+}
+
+export function emitTelemetry(type: TelemetryEventType, options?: TelemetryOptions): TelemetryEvent
+export function emitTelemetry(payload: TelemetryPayload): TelemetryEvent
+export function emitTelemetry(
+  typeOrPayload: TelemetryEventType | TelemetryPayload,
+  options: TelemetryOptions = {},
+): TelemetryEvent {
+  const payload: TelemetryPayload =
+    typeof typeOrPayload === "string" ? { type: typeOrPayload, ...options } : typeOrPayload
+
+  const event: TelemetryEvent = {
+    id: generateEventId(),
+    type: payload.type,
+    timestamp: Date.now(),
+    patchId: payload.patchId,
+    realm: payload.realm,
+    userId: payload.userId,
+    metadata: payload.metadata,
+  }
+
+  writeEvent(event)
+  dispatchAsync(event)
+
+  return event
+}
+
+export function subscribeToTelemetry(handler: (event: TelemetryEvent) => void): () => void {
+  const listener = (event: Event) => {
+    const telemetryEvent = (event as CustomEvent<TelemetryEvent>).detail
+    handler(telemetryEvent)
 export function emitTelemetry(type: TelemetryEventType, options?: TelemetryEventOptions): TelemetryEvent
 export function emitTelemetry(event: TelemetryEventInput): TelemetryEvent
 export function emitTelemetry(
@@ -160,7 +221,8 @@ export function emitTelemetry(
     }
   }
 
-  return event
+  telemetryEmitter.addEventListener("telemetry", listener)
+  return () => telemetryEmitter.removeEventListener("telemetry", listener)
 }
 
 export function getRecentEvents(limit = 50): TelemetryEvent[] {
