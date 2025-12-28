@@ -1,0 +1,9 @@
+{
+  "name": "@wcmeta/evm",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "dependencies": {
+    "viem": "^2.21.41"
+  }
+}
