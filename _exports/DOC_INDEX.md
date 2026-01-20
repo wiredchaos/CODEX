@@ -16,3 +16,7 @@
 | FASHION_DESIGN_SWARM.md | WIRED CHAOS META — FASHION DESIGN SWARM (FDS-1) | 2025-12-19 | Swarm-based onboarding blueprint for fashion designers covering agents, curriculum, mint rules, vault/DCA, and commerce flows.【F:FASHION_DESIGN_SWARM.md†L1-L69】 |
 | UPLOAD_CONTRACT.md | Upload Contract (Non-Developer Safe) | 2025-12-19 | Rules for placing ZIPs in INBOX_UPLOADS, automation behaviors, and verification steps post-ingest.【F:UPLOAD_CONTRACT.md†L1-L16】 |
 | PRODUCTION_CHECKLIST.md | Production Checklist (ZIP Ingest) | 2025-12-19 | Checklist for upload, automation, verification, and merge phases of ZIP ingest workflow.【F:PRODUCTION_CHECKLIST.md†L1-L17】 |
+| docs/CITIZ3N_H3X_CANON.md | CITIZ3N.H3X — Canonical Perimeter Spec | 2025-12-19 | Defines CITIZ3N.H3X as a spatial perimeter city, mapping hex zones, embassies, foundry systems, agents, governance, and failure states to physical metaphors.【F:docs/CITIZ3N_H3X_CANON.md†L1-L97】 |
+
+## Changelog
+- 2025-12-19: Added the CITIZ3N.H3X canonical perimeter specification to the system doc index.
