@@ -65,3 +65,4 @@ CODEX operates as the truth layer holding manifests, contracts, and state. WIRED
 - If your network blocks the default registry, pin npm to the public registry before installing: `npm config set registry https://registry.npmjs.org/`.
 - The repo includes a checked-in `.npmrc` with the same registry pin to keep installs consistent across environments.
 - If you need to consume scoped packages hosted on GitHub Packages, authenticate with your scope before installing: `npm login --scope=@yourScope --registry=https://npm.pkg.github.com`.
+- For Three.js playground reference work, clone the upstream sandbox locally: `git clone https://github.com/pinkforest/threejs-playground.git`.
