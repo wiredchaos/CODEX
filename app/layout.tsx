@@ -7,8 +7,8 @@ const appSans = Inter({ subsets: ["latin"], variable: "--font-app-sans" })
 const appMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-app-mono" })
 
 export const metadata: Metadata = {
-  title: "WIRED CHAOS META HUB | Galaxy Orchestrator",
-  description: "Trinity 3D navigation hub for isolated patch architecture across Business and Akashic realms",
+  title: "Blocks SOTD — Editorial WebGPU Experience",
+  description: "Minimalist, editorial SOTD concept built on Three.js Blocks with WebGPU-first rendering.",
   generator: "v0.app",
   icons: {
     icon: [
