@@ -5,6 +5,7 @@ WIRED CHAOS WORKFLOW PUBLISH CODEX
 ## Structure
 - `README.md`: Brief label for the repository and quick pointers.
 - `DIAGNOSTIC.md`: Current snapshot of repository layout, status, and recommended next steps.
+- `docs/AGENTIC_UI_INGESTION_PIPELINE.md`: Agentic UI ingestion pipeline and Transmission Frame compiler spec.
 ## Copilot prompt
 See [COPILOT_PROMPT.md](COPILOT_PROMPT.md) for the recommended Copilot Chat prompt to synchronize on the WIRED CHAOS organization.
 
@@ -65,3 +66,4 @@ CODEX operates as the truth layer holding manifests, contracts, and state. WIRED
 - If your network blocks the default registry, pin npm to the public registry before installing: `npm config set registry https://registry.npmjs.org/`.
 - The repo includes a checked-in `.npmrc` with the same registry pin to keep installs consistent across environments.
 - If you need to consume scoped packages hosted on GitHub Packages, authenticate with your scope before installing: `npm login --scope=@yourScope --registry=https://npm.pkg.github.com`.
+- For Three.js playground reference work, clone the upstream sandbox locally: `git clone https://github.com/pinkforest/threejs-playground.git`.
