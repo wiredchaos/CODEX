@@ -23,7 +23,7 @@ jobs:
           node-version: 20
           cache: 'npm'
       - name: Install dependencies
-        run: npm ci
+        run: npm install
       - name: Generate Prisma client
         run: npx prisma generate
       - name: Build project
@@ -43,7 +43,7 @@ jobs:
           node-version: 20
           cache: 'npm'
       - name: Install dependencies
-        run: npm ci
+        run: npm install
       - name: NPM audit (high/critical)
         run: npm audit --production --audit-level=high
       - name: Trivy filesystem scan
