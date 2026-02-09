@@ -6,6 +6,7 @@ WIRED CHAOS WORKFLOW PUBLISH CODEX
 - `README.md`: Brief label for the repository and quick pointers.
 - `DIAGNOSTIC.md`: Current snapshot of repository layout, status, and recommended next steps.
 - `docs/PAGEINDEX_AGENTIC_INGESTION.md`: Proposal for integrating PageIndex as a core ingestion substrate for agentic systems.
+
 ## Copilot prompt
 See [COPILOT_PROMPT.md](COPILOT_PROMPT.md) for the recommended Copilot Chat prompt to synchronize on the WIRED CHAOS organization.
 
