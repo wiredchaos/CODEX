@@ -1,0 +1,12 @@
+{
+  "name": "wired-chaos-stack",
+  "private": true,
+  "packageManager": "pnpm@9.12.1",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "lint": "echo 'No lint configured yet'",
+    "test": "echo 'No tests configured yet'"
+  }
+}
