@@ -2,6 +2,25 @@
 
 WIRED CHAOS WORKFLOW PUBLISH CODEX
 
+## Portfolio Skill Invariant
+This repository enforces a root-level portfolio invariant: every merged build must demonstrate or document evidence for the required skill set.
+
+Required skill set:
+- Claude Code
+- Claude API
+- MCP Servers
+- Agent Orchestration
+- Automation
+- Linux
+- TypeScript
+- Fractal Claude Clusters
+
+Implementation and proof policy:
+- Canonical checklist and proof format: [`PORTFOLIO.md`](PORTFOLIO.md)
+- Pull request enforcement template: [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md)
+
+PRs missing skill proof may be closed without review.
+
 ## Structure
 - `README.md`: Brief label for the repository and quick pointers.
 - `DIAGNOSTIC.md`: Current snapshot of repository layout, status, and recommended next steps.
