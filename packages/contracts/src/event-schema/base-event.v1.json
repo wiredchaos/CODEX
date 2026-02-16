@@ -1,0 +1,34 @@
+{
+  "$id": "ntko2090.event.base.v1",
+  "type": "object",
+  "required": ["eventId", "eventType", "timestamp", "scopes", "payload"],
+  "additionalProperties": false,
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "eventType": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scopes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "payload": {
+      "type": "object"
+    },
+    "operation": {
+      "type": "string"
+    }
+  }
+}
