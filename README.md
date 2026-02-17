@@ -25,6 +25,20 @@ PRs missing skill proof may be closed without review.
 - `README.md`: Brief label for the repository and quick pointers.
 - `DIAGNOSTIC.md`: Current snapshot of repository layout, status, and recommended next steps.
 - `docs/AGENTIC_UI_INGESTION_PIPELINE.md`: Agentic UI ingestion pipeline and Transmission Frame compiler spec.
+
+## Canonical architecture (WIRED CHAOS META)
+The canonical architecture baseline is formalized in `/doc` and serves as the non-runtime authority for policy boundaries, trust handling, ingress constraints, and execution contracts.
+
+- `doc/ROOT_LAW.md`: Non-negotiable architectural constraints and compliance gate.
+- `doc/ARCHITECTURE_PLANES.md`: Canonical separation of concerns across the six architecture planes.
+- `doc/IMMUNE_LAYER_SPEC.md`: Deterministic trust posture and quarantine/deny semantics.
+- `doc/DFC_CORE_SERVICE_SPEC.md`: Deterministic flow control and execution directive model.
+- `doc/BRAND_ORIENTATION_LAYER_SPEC.md`: Experience posture mapping without policy mutation.
+- `doc/INGRESS_MEMBRANE_SPEC.md`: Boundary normalization and reject-first ingress contract.
+- `doc/EXECUTION_FABRIC_SPEC.md`: Authorized side-effect execution and receipt guarantees.
+
+These artifacts are specification-only and do not introduce runtime behavior.
+
 ## Copilot prompt
 See [COPILOT_PROMPT.md](COPILOT_PROMPT.md) for the recommended Copilot Chat prompt to synchronize on the WIRED CHAOS organization.
 
