@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Grid, Float } from '@react-three/drei';
+import { OrbitControls, Grid, Center, Text, Float } from '@react-three/drei';
 import { useState, useRef } from 'react';
 import * as THREE from 'three';
 
@@ -141,7 +141,7 @@ function Scene() {
   );
 }
 
-const Index = () => {
+const FieldOps = () => {
   return (
     <div className="w-full h-screen bg-black overflow-hidden">
       <Canvas
@@ -156,4 +156,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default FieldOps;
