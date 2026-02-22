@@ -1,16 +1,26 @@
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Grid, Float } from '@react-three/drei';
+import { OrbitControls, Grid, Float, Stars } from '@react-three/drei';
 import { useState, useRef } from 'react';
 import * as THREE from 'three';
+import { useRedLedgerControl } from '@/hooks/useRedLedgerControl';
 
 interface LiquidityNodeProps {
   position: [number, number, number];
   isCaptured: boolean;
   onCapture: () => void;
-  index: number;
+  volatility: number;
+  spawnRateMultiplier: number;
+  uniqueId: string;
 }
 
-function LiquidityNode({ position, isCaptured, onCapture }: LiquidityNodeProps) {
+function LiquidityNode({ 
+  position, 
+  isCaptured, 
+  onCapture,
+  volatility,
+  spawnRateMultiplier,
+  uniqueId 
+}: LiquidityNodeProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
 
@@ -20,8 +30,15 @@ function LiquidityNode({ position, isCaptured, onCapture }: LiquidityNodeProps) 
     }
   };
 
+  const floatSpeed = 2 * spawnRateMultiplier;
+  const particleIntensity = 2 * volatility;
+
   return (
-    <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
+    <Float 
+      speed={floatSpeed} 
+      rotationIntensity={0.5} 
+      floatIntensity={1}
+    >
       <mesh
         ref={meshRef}
         position={position}
@@ -39,7 +56,7 @@ function LiquidityNode({ position, isCaptured, onCapture }: LiquidityNodeProps) 
         />
         <pointLight
           color={isCaptured ? '#00ffff' : '#ff0044'}
-          intensity={2}
+          intensity={particleIntensity}
           distance={5}
         />
       </mesh>
@@ -48,31 +65,54 @@ function LiquidityNode({ position, isCaptured, onCapture }: LiquidityNodeProps) 
 }
 
 function Scene() {
-  const [capturedNodes, setCapturedNodes] = useState<Set<number>>(new Set());
+  const { flags, captureNode, isLoading, error } = useRedLedgerControl();
+  const [capturedNodes, setCapturedNodes] = useState<Set<string>>(new Set());
   
   const nodes = [
-    { position: [-4, 2, 0] as [number, number, number], id: 0 },
-    { position: [-2, 1.5, 3] as [number, number, number], id: 1 },
-    { position: [0, 2.5, -2] as [number, number, number], id: 2 },
-    { position: [2, 1.8, 2] as [number, number, number], id: 3 },
-    { position: [4, 2.2, -1] as [number, number, number], id: 4 },
+    { position: [-4, 2, 0] as [number, number, number], id: 'node-0' },
+    { position: [-2, 1.5, 3] as [number, number, number], id: 'node-1' },
+    { position: [0, 2.5, -2] as [number, number, number], id: 'node-2' },
+    { position: [2, 1.8, 2] as [number, number, number], id: 'node-3' },
+    { position: [4, 2.2, -1] as [number, number, number], id: 'node-4' },
   ];
 
-  const handleCapture = (nodeId: number) => {
-    setCapturedNodes((prev) => new Set([...prev, nodeId]));
+  const handleCapture = async (uniqueId: string) => {
+    try {
+      await captureNode(uniqueId);
+      setCapturedNodes((prev) => new Set([...prev, uniqueId]));
+    } catch (err) {
+      console.error('Failed to capture node:', err);
+    }
   };
 
   const signalPercent = Math.round((capturedNodes.size / nodes.length) * 100);
 
+  // Convert hex color to RGB for Three.js color
+  const skyTint = flags.skyTint || '#0a0a0f';
+
   return (
     <>
-      {/* Cyberpunk fog */}
-      <fog attach="fog" args={['#0a0a0f', 5, 30]} />
+      {/* Dynamic sky color from API */}
+      <color attach="background" args={[skyTint]} />
       
-      {/* Lighting */}
+      {/* Cyberpunk fog - matches sky tint */}
+      <fog attach="fog" args={[skyTint, 5, 30]} />
+      
+      {/* Ambient lighting */}
       <ambientLight intensity={0.3} />
       <pointLight position={[10, 10, 10]} intensity={0.5} color="#00ffff" />
       <pointLight position={[-10, 5, -10]} intensity={0.3} color="#ff0044" />
+      
+      {/* Particle stars - intensity controlled by volatility */}
+      <Stars 
+        radius={100} 
+        depth={50} 
+        count={5000} 
+        factor={4} 
+        saturation={0} 
+        fade 
+        speed={1}
+      />
       
       {/* Neon infinite grid floor */}
       <Grid
@@ -96,7 +136,9 @@ function Scene() {
           position={node.position}
           isCaptured={capturedNodes.has(node.id)}
           onCapture={() => handleCapture(node.id)}
-          index={node.id}
+          volatility={flags.volatility}
+          spawnRateMultiplier={flags.spawnRateMultiplier}
+          uniqueId={node.id}
         />
       ))}
 
@@ -113,22 +155,38 @@ function Scene() {
 
       {/* HUD Overlay */}
       <div className="absolute top-4 left-4 pointer-events-none">
-        <div className="bg-black/80 border border-cyan-500/50 p-4 rounded-lg backdrop-blur-sm">
+        <div className="bg-black/80 border border-cyan-500/50 p-4 rounded-lg backdrop-blur-sm space-y-2">
           <div className="font-mono text-2xl text-cyan-400 font-bold">
             SIGNAL: {signalPercent}%
           </div>
-          <div className="text-xs text-gray-400 mt-1">
+          <div className="text-xs text-gray-400">
             NODES CAPTURED: {capturedNodes.size}/{nodes.length}
+          </div>
+          <div className="text-xs text-gray-400">
+            VOLATILITY: {flags.volatility.toFixed(2)}
+          </div>
+          <div className="text-xs text-gray-400">
+            SPAWN RATE: {flags.spawnRateMultiplier.toFixed(2)}x
           </div>
         </div>
       </div>
 
-      {/* Title overlay */}
-      <div className="absolute top-4 right-4 pointer-events-none text-right">
+      {/* Connection status */}
+      <div className="absolute top-4 right-4 pointer-events-none text-right space-y-1">
         <h1 className="text-2xl font-bold text-red-500 tracking-widest">
           RED LEDGER
         </h1>
         <p className="text-sm text-cyan-400">FIELD ENGINE v1.0</p>
+        {error && (
+          <div className="text-xs text-red-500 mt-2">
+            API ERROR: {error}
+          </div>
+        )}
+        {isLoading && (
+          <div className="text-xs text-yellow-400">
+            SYNCING...
+          </div>
+        )}
       </div>
 
       {/* Instructions */}
@@ -149,7 +207,6 @@ const Index = () => {
         dpr={[1, 2]}
         performance={{ min: 0.5 }}
       >
-        <color attach="background" args={['#0a0a0f']} />
         <Scene />
       </Canvas>
     </div>
