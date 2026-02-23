@@ -1,108 +1,177 @@
-import { Canvas } from '@react-three/fiber';
-import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react';
-import { useRedLedgerControl } from '@/hooks/useRedLedgerControl';
-import SceneRoot, { SceneBridgeProvider, type SceneBridge, type SceneFlags } from '@/components/SceneRoot';
+import { Canvas } from "@react-three/fiber";
+import { useEffect, useMemo, useSyncExternalStore, useState } from "react";
+import SceneRoot from "@/components/SceneRoot";
+import { applyRelaySnapshot, RedLedgerStore, type RedLedgerNode } from "@/RedLedgerStore";
+import { ConfigPanel } from "@/components/ConfigPanel";
+import { useRedLedgerConfig } from "@/hooks/useRedLedgerConfig";
+import { Badge } from "@/components/ui/badge";
 
-const NODES = [
-  { position: [-4, 2, 0] as const, id: 'node-0' },
-  { position: [-2, 1.5, 3] as const, id: 'node-1' },
-  { position: [0, 2.5, -2] as const, id: 'node-2' },
-  { position: [2, 1.8, 2] as const, id: 'node-3' },
-  { position: [4, 2.2, -1] as const, id: 'node-4' },
+const DEFAULT_NODES: RedLedgerNode[] = [
+  { id: "node-0", position: [-4, 2, 0], signal: 0.25, volatility: 0.2 },
+  { id: "node-1", position: [-2, 1.5, 3], signal: 0.35, volatility: 0.35 },
+  { id: "node-2", position: [0, 2.5, -2], signal: 0.55, volatility: 0.3 },
+  { id: "node-3", position: [2, 1.8, 2], signal: 0.4, volatility: 0.25 },
+  { id: "node-4", position: [4, 2.2, -1], signal: 0.2, volatility: 0.15 },
 ];
 
-function createBridge(): SceneBridge {
-  const listeners = new Set<() => void>();
-  return {
-    flags: { skyTint: '#000000', volatility: 0, spawnRate: 1 },
-    captured: new Set<string>(),
-    onCapture: () => {},
-    subscribe: (listener) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
-    notify: () => listeners.forEach((l) => l()),
-  };
+function useRedLedgerSnapshot() {
+  return useSyncExternalStore(
+    RedLedgerStore.subscribe,
+    () => RedLedgerStore.getState(),
+    () => RedLedgerStore.getState()
+  );
 }
 
-const FieldOps = () => {
-  const { flags, captureNode, isLoading, error } = useRedLedgerControl();
+export default function FieldOps() {
+  const { config, isValid } = useRedLedgerConfig();
+  const snap = useRedLedgerSnapshot();
+  const [connected, setConnected] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
 
-  // React UI state (kept outside Canvas)
-  const [capturedNodes, setCapturedNodes] = useState<Set<string>>(() => new Set());
+  // Seed nodes once (store does not cause React re-renders unless subscribed).
+  useEffect(() => {
+    const s = RedLedgerStore.getState();
+    if (!s.nodes || s.nodes.length === 0) {
+      RedLedgerStore.setState({ nodes: DEFAULT_NODES });
+    }
+  }, []);
 
-  // Stable bridge that isolates R3F from frequent provider re-renders.
-  const bridgeRef = useRef<SceneBridge | null>(null);
-  if (!bridgeRef.current) bridgeRef.current = createBridge();
+  // Relay Sync Layer: SSE => store.setState (no Canvas props)
+  useEffect(() => {
+    setConnected(false);
+    setSyncError(null);
 
-  // Never allow undefined into the scene.
-  const safeFlags: SceneFlags = useMemo(
-    () => ({
-      skyTint: (flags?.skyTint ?? '#000000') ?? '#000000',
-      volatility: (flags?.volatility ?? 0) ?? 0,
-      spawnRate: (flags?.spawnRateMultiplier ?? 1) ?? 1,
-    }),
-    [flags?.skyTint, flags?.volatility, flags?.spawnRateMultiplier]
+    if (!isValid) return;
+
+    const baseUrl = config.relayBaseUrl.replace(/\/$/, "");
+    const appId = config.appId;
+
+    let alive = true;
+    let es: EventSource | null = null;
+
+    const fetchInitial = async () => {
+      try {
+        const [stateRes, eventsRes, factionsRes] = await Promise.all([
+          fetch(`${baseUrl}/api/redledger/state?appId=${appId}`),
+          fetch(`${baseUrl}/api/redledger/events?appId=${appId}`),
+          fetch(`${baseUrl}/api/redledger/factions?appId=${appId}`),
+        ]);
+
+        if (!stateRes.ok || !eventsRes.ok || !factionsRes.ok) {
+          throw new Error("Failed to fetch initial RedLedger snapshot");
+        }
+
+        const [state, events, factions] = await Promise.all([
+          stateRes.json(),
+          eventsRes.json(),
+          factionsRes.json(),
+        ]);
+
+        if (!alive) return;
+        applyRelaySnapshot({ state, events, factions });
+      } catch (e) {
+        if (!alive) return;
+        setSyncError(e instanceof Error ? e.message : "Failed to sync");
+      }
+    };
+
+    fetchInitial();
+
+    try {
+      es = new EventSource(`${baseUrl}/api/redledger/stream?appId=${appId}`);
+      es.onopen = () => {
+        if (!alive) return;
+        setConnected(true);
+      };
+
+      es.onmessage = (event) => {
+        if (!alive) return;
+        try {
+          const update = JSON.parse(event.data);
+          applyRelaySnapshot(update);
+        } catch (e) {
+          // Ignore malformed frames; keep scene alive.
+          console.error("Failed to parse SSE message", e);
+        }
+      };
+
+      es.onerror = () => {
+        if (!alive) return;
+        setConnected(false);
+        setSyncError("SSE connection error");
+        es?.close();
+        es = null;
+      };
+    } catch (e) {
+      setConnected(false);
+      setSyncError(e instanceof Error ? e.message : "SSE init failed");
+    }
+
+    return () => {
+      alive = false;
+      es?.close();
+    };
+  }, [config.appId, config.relayBaseUrl, isValid]);
+
+  // Memoize Canvas subtree so React HUD re-renders do not touch the R3F tree.
+  const canvasLayer = useMemo(
+    () => (
+      <Canvas camera={{ position: [0, 5, 10], fov: 75 }} dpr={[1, 2]} performance={{ min: 0.5 }}>
+        <SceneRoot />
+      </Canvas>
+    ),
+    []
   );
 
-  const handleCapture = async (nodeId: string) => {
-    try {
-      await captureNode(nodeId);
-      setCapturedNodes((prev) => new Set([...prev, nodeId]));
-    } catch (err) {
-      console.error('Failed to capture node:', err);
-    }
-  };
-
-  // Push updates into the bridge via refs (no prop-driven remounting).
-  useEffect(() => {
-    const bridge = bridgeRef.current!;
-    bridge.flags = safeFlags;
-    bridge.notify();
-  }, [safeFlags]);
-
-  useEffect(() => {
-    const bridge = bridgeRef.current!;
-    bridge.captured = capturedNodes;
-    bridge.onCapture = handleCapture;
-    bridge.notify();
-  }, [capturedNodes]);
-
-  const signalPercent = Math.round((capturedNodes.size / NODES.length) * 100);
+  const nodesCaptured = (snap.nodes || []).filter((n) => n.captured).length;
 
   return (
     <div className="w-full h-screen bg-black overflow-hidden relative">
-      {/* Canvas must never be conditionally rendered and must remain mounted */}
-      <SceneBridgeProvider bridgeRef={bridgeRef as MutableRefObject<SceneBridge>}>
-        <Canvas camera={{ position: [0, 5, 10], fov: 75 }} dpr={[1, 2]} performance={{ min: 0.5 }}>
-          <SceneRoot />
-        </Canvas>
-      </SceneBridgeProvider>
+      {/* Canvas must NEVER be conditionally rendered */}
+      {canvasLayer}
 
-      {/* HUD Overlay (outside Canvas) */}
-      <div className="absolute top-4 left-4 pointer-events-none">
-        <div className="bg-black/80 border border-cyan-500/50 p-4 rounded-lg backdrop-blur-sm space-y-2">
-          <div className="font-mono text-2xl text-cyan-400 font-bold">SIGNAL: {signalPercent}%</div>
-          <div className="text-xs text-gray-400">NODES CAPTURED: {capturedNodes.size}/{NODES.length}</div>
-          <div className="text-xs text-gray-400">VOLATILITY: {safeFlags.volatility.toFixed(2)}</div>
-          <div className="text-xs text-gray-400">SPAWN RATE: {safeFlags.spawnRate.toFixed(2)}x</div>
+      {/* HUD Overlay (React-driven, separate subscription, does not affect Canvas tree) */}
+      <div className="absolute top-4 left-4 right-4 flex items-start justify-between gap-3 pointer-events-none">
+        <div className="pointer-events-auto">
+          <ConfigPanel />
+        </div>
+
+        <div className="flex-1" />
+
+        <div className="pointer-events-none text-right space-y-1">
+          <div className="flex items-center justify-end gap-2">
+            <Badge
+              variant="outline"
+              className="border-cyan-500/40 bg-black/40 text-cyan-200 font-mono"
+            >
+              {connected ? "LIVE" : isValid ? "OFFLINE" : "CONFIG"}
+            </Badge>
+            {snap.worldVersion ? (
+              <Badge variant="outline" className="border-white/10 bg-black/40 text-white/80 font-mono">
+                v{snap.worldVersion}
+              </Badge>
+            ) : null}
+          </div>
+          {syncError ? <div className="text-xs text-red-300">{syncError}</div> : null}
         </div>
       </div>
 
-      {/* Connection status (outside Canvas) */}
-      <div className="absolute top-4 right-4 pointer-events-none text-right space-y-1">
-        <h1 className="text-2xl font-bold text-red-500 tracking-widest">RED LEDGER</h1>
-        <p className="text-sm text-cyan-400">FIELD ENGINE v1.0</p>
-        {error && <div className="text-xs text-red-500 mt-2">API ERROR: {error}</div>}
-        {isLoading && <div className="text-xs text-yellow-400">SYNCING...</div>}
+      <div className="absolute top-20 left-4 pointer-events-none">
+        <div className="bg-black/80 border border-cyan-500/50 p-4 rounded-2xl backdrop-blur-sm space-y-2">
+          <div className="font-mono text-2xl text-cyan-300 font-bold tracking-wide">
+            SIGNAL: {Math.round(snap.globalSignal || 0)}
+          </div>
+          <div className="text-xs text-white/70">NODES CAPTURED: {nodesCaptured}/{(snap.nodes || []).length}</div>
+          <div className="text-xs text-white/60">FACTIONS: {(snap.factions || []).length}</div>
+          <div className="text-[11px] text-white/50 max-w-xs">
+            {isValid ? "Streaming world updates into the scene store." : "Open settings to connect to a relay."}
+          </div>
+        </div>
       </div>
 
-      {/* Instructions (outside Canvas) */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none">
-        <p className="text-gray-400 text-sm font-mono">CLICK NODES TO CAPTURE • DRAG TO ROTATE</p>
+        <p className="text-white/60 text-sm font-mono">CLICK NODES TO CAPTURE • DRAG TO ROTATE</p>
       </div>
     </div>
   );
-};
-
-export default FieldOps;
+}

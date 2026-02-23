@@ -1,265 +1,207 @@
-import React, { createContext, useContext, useEffect, useMemo, useRef } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
-import { Grid, Stars, OrbitControls } from "@react-three/drei";
+import React, { memo, useEffect, useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import { Grid, OrbitControls, Stars } from "@react-three/drei";
 import * as THREE from "three";
+import { RedLedgerStore, type RedLedgerNode } from "@/RedLedgerStore";
 
-export type SceneFlags = {
-  skyTint: string;
-  volatility: number;
-  spawnRate: number;
-};
-
-export type SceneBridge = {
-  flags: SceneFlags;
-  captured: Set<string>;
-  onCapture: (nodeId: string) => void;
-  subscribe: (listener: () => void) => () => void;
-  notify: () => void;
-};
-
-function createSceneBridge(): SceneBridge {
-  const listeners = new Set<() => void>();
-
-  return {
-    flags: {
-      skyTint: "#000000",
-      volatility: 0,
-      spawnRate: 1,
-    },
-    captured: new Set<string>(),
-    onCapture: () => {},
-    subscribe: (listener) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
-    notify: () => {
-      listeners.forEach((l) => l());
-    },
-  };
-}
-
-const SceneBridgeContext = createContext<React.MutableRefObject<SceneBridge> | null>(null);
-
-export function SceneBridgeProvider({
-  bridgeRef,
-  children,
-}: {
-  bridgeRef: React.MutableRefObject<SceneBridge>;
-  children: React.ReactNode;
-}) {
-  return <SceneBridgeContext.Provider value={bridgeRef}>{children}</SceneBridgeContext.Provider>;
-}
-
-function useSceneBridgeRef() {
-  const ctx = useContext(SceneBridgeContext);
-
-  // Safe fallback for dev/preview usage.
-  const fallbackRef = useRef<SceneBridge | null>(null);
-  if (!fallbackRef.current) fallbackRef.current = createSceneBridge();
-
-  return ctx ?? ({ current: fallbackRef.current } as React.MutableRefObject<SceneBridge>);
-}
-
-const NODES = [
-  { position: [-4, 2, 0] as const, id: "node-0" },
-  { position: [-2, 1.5, 3] as const, id: "node-1" },
-  { position: [0, 2.5, -2] as const, id: "node-2" },
-  { position: [2, 1.8, 2] as const, id: "node-3" },
-  { position: [4, 2.2, -1] as const, id: "node-4" },
+const FALLBACK_NODES: RedLedgerNode[] = [
+  { id: "node-0", position: [-4, 2, 0], signal: 0.25, volatility: 0.2 },
+  { id: "node-1", position: [-2, 1.5, 3], signal: 0.35, volatility: 0.35 },
+  { id: "node-2", position: [0, 2.5, -2], signal: 0.55, volatility: 0.3 },
+  { id: "node-3", position: [2, 1.8, 2], signal: 0.4, volatility: 0.25 },
+  { id: "node-4", position: [4, 2.2, -1], signal: 0.2, volatility: 0.15 },
 ];
 
-type NodeDef = (typeof NODES)[number];
-
-type RuntimeState = {
-  flags: SceneFlags;
-  captured: Set<string>;
-  onCapture: (nodeId: string) => void;
-};
-
-function normalizeFlags(flags: Partial<SceneFlags> | null | undefined): SceneFlags {
-  const skyTint = flags?.skyTint ?? "#000000";
-  const volatility = flags?.volatility ?? 0;
-  const spawnRate = flags?.spawnRate ?? 1;
-  return { skyTint, volatility, spawnRate };
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t;
 }
 
-function LiquidityNode({
-  def,
-  sphereGeom,
-  matFree,
-  matCaptured,
-  runtimeRef,
-  seed,
-}: {
-  def: NodeDef;
-  sphereGeom: THREE.SphereGeometry;
-  matFree: THREE.MeshStandardMaterial;
-  matCaptured: THREE.MeshStandardMaterial;
-  runtimeRef: React.MutableRefObject<RuntimeState>;
-  seed: number;
-}) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const lightRef = useRef<THREE.PointLight>(null);
-  const hoveredRef = useRef(false);
-  const lastCapturedRef = useRef<boolean | null>(null);
-
-  const base = def.position;
-
-  useFrame(({ clock }, dt) => {
-    const mesh = meshRef.current;
-    const light = lightRef.current;
-    if (!mesh || !light) return;
-
-    const { flags, captured } = runtimeRef.current;
-
-    const t = clock.getElapsedTime();
-    const spawn = flags.spawnRate;
-
-    // Hover scale without React state.
-    const targetScale = hoveredRef.current ? 1.2 : 1;
-    const s = mesh.scale.x + (targetScale - mesh.scale.x) * Math.min(1, dt * 10);
-    mesh.scale.setScalar(s);
-
-    // Gentle float animation (spawn rate = speed).
-    mesh.position.set(
-      base[0],
-      base[1] + Math.sin(t * (0.9 * spawn) + seed) * 0.35,
-      base[2]
-    );
-    mesh.rotation.y += dt * 0.35 * spawn;
-
-    const isCaptured = captured.has(def.id);
-    if (lastCapturedRef.current !== isCaptured) {
-      lastCapturedRef.current = isCaptured;
-      mesh.material = isCaptured ? matCaptured : matFree;
-      light.color.set(isCaptured ? "#00ffff" : "#ff0044");
-    }
-
-    // Volatility drives glow intensity.
-    light.intensity = 2 * flags.volatility;
-  });
-
-  return (
-    <group>
-      <mesh
-        ref={meshRef}
-        onClick={() => {
-          const { captured, onCapture } = runtimeRef.current;
-          if (captured.has(def.id)) return;
-          onCapture(def.id);
-        }}
-        onPointerOver={() => {
-          hoveredRef.current = true;
-        }}
-        onPointerOut={() => {
-          hoveredRef.current = false;
-        }}
-      >
-        <primitive object={sphereGeom} attach="geometry" />
-        <primitive object={matFree} attach="material" />
-        <pointLight ref={lightRef} color="#ff0044" intensity={0} distance={5} />
-      </mesh>
-    </group>
-  );
+function clamp01(n: number) {
+  if (!Number.isFinite(n)) return 0;
+  return Math.min(1, Math.max(0, n));
 }
 
-export default function SceneRoot() {
-  const bridgeRef = useSceneBridgeRef();
+type NodeVis = { signal: number; volatility: number };
 
-  // Runtime state lives in refs (no React-driven scene churn).
-  const runtimeRef = useRef<RuntimeState>({
-    flags: normalizeFlags(bridgeRef.current.flags),
-    captured: bridgeRef.current.captured,
-    onCapture: bridgeRef.current.onCapture,
-  });
-
-  const nodes = useMemo(() => NODES, []);
-
-  // Shared geometry/material (memoized + disposed on unmount).
+function SceneRootImpl() {
+  // Stable scene resources (created once)
   const sphereGeom = useMemo(() => new THREE.SphereGeometry(0.8, 32, 32), []);
-  const matFree = useMemo(
+  const matBase = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
         color: "#ff0044",
         emissive: "#ff0044",
-        emissiveIntensity: 1,
-        toneMapped: false,
-      }),
-    []
-  );
-  const matCaptured = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: "#00ffff",
-        emissive: "#00ffff",
-        emissiveIntensity: 1.5,
+        emissiveIntensity: 1.1,
+        roughness: 0.25,
+        metalness: 0.35,
         toneMapped: false,
       }),
     []
   );
 
+  const bgColor = useMemo(() => new THREE.Color("#070A14"), []);
+  const fog = useMemo(() => new THREE.Fog("#070A14", 5, 30), []);
+
+  // Sky tint endpoints (no per-frame allocations)
+  const skyA = useMemo(() => new THREE.Color("#070A14"), []);
+  const skyB = useMemo(() => new THREE.Color("#001824"), []);
+
+  // Refs for imperative updates (required)
+  const signalBarRef = useRef<THREE.Mesh | null>(null);
+  const nodeMeshRefs = useRef<Record<string, THREE.Mesh | null>>({});
+  const factionColorRefs = useRef<Record<string, THREE.Color>>({});
+
+  // Additional internal refs for stable, per-node resources
+  const nodeMaterialRefs = useRef<Record<string, THREE.MeshStandardMaterial>>({});
+  const nodeBasePosRefs = useRef<Record<string, THREE.Vector3>>({});
+  const nodeVisRefs = useRef<Record<string, NodeVis>>({});
+
+  // Smooth visual values
+  const signalVisRef = useRef(0);
+
+  // Nodes are created once; subsequent updates are imperative.
+  const initialNodes = useMemo(() => {
+    const s = RedLedgerStore.getState();
+    const nodes = s.nodes && s.nodes.length > 0 ? s.nodes : FALLBACK_NODES;
+    return nodes.slice();
+  }, []);
+
+  // Subscribe to store updates (imperative mutations; no mesh recreation)
+  useEffect(() => {
+    const unsub = RedLedgerStore.subscribe(() => {
+      const s = RedLedgerStore.getState();
+
+      // Cache faction colors (stable objects)
+      for (const f of s.factions || []) {
+        if (!f?.id) continue;
+        const c = factionColorRefs.current[f.id] ?? new THREE.Color("#ffffff");
+        c.set(f.color ?? "#ffffff");
+        factionColorRefs.current[f.id] = c;
+      }
+
+      // Update nodes (existence-guarded)
+      for (const n of s.nodes || []) {
+        const mesh = nodeMeshRefs.current[n.id];
+        if (!mesh) continue;
+
+        const mat = nodeMaterialRefs.current[n.id];
+        if (!mat) continue;
+
+        // Position base (stored as Vector3, mutated in-place)
+        const base = nodeBasePosRefs.current[n.id] ?? new THREE.Vector3();
+        const p = n.position ?? [0, 0, 0];
+        base.set(p[0], p[1], p[2]);
+        nodeBasePosRefs.current[n.id] = base;
+
+        // Material color from faction or captured status
+        const isCaptured = Boolean(n.captured);
+        const factionColor = n.factionId ? factionColorRefs.current[n.factionId] : null;
+
+        if (factionColor) {
+          mat.color.copy(factionColor);
+          mat.emissive.copy(factionColor);
+        } else {
+          const hex = isCaptured ? "#00ffff" : "#ff0044";
+          mat.color.set(hex);
+          mat.emissive.set(hex);
+        }
+
+        mat.emissiveIntensity = isCaptured ? 1.7 : 1.1;
+        mat.needsUpdate = false;
+      }
+    });
+
+    return () => unsub();
+  }, []);
+
+  // Dispose stable resources and per-node materials on unmount
   useEffect(() => {
     return () => {
       sphereGeom.dispose();
-      matFree.dispose();
-      matCaptured.dispose();
+      matBase.dispose();
+      Object.values(nodeMaterialRefs.current).forEach((m) => m.dispose());
     };
-  }, [sphereGeom, matFree, matCaptured]);
+  }, [sphereGeom, matBase]);
 
-  // Scene environment objects (stable instances).
-  const bgColor = useMemo(() => new THREE.Color("#000000"), []);
-  const fog = useMemo(() => new THREE.Fog("#000000", 5, 30), []);
+  useFrame(({ clock, scene }, dt) => {
+    const s = RedLedgerStore.getState();
 
-  const { scene } = useThree();
-
-  useEffect(() => {
+    // Background + fog driven by global signal (imperative)
+    const targetSignal01 = clamp01((s.globalSignal ?? 0) / 100);
+    bgColor.copy(skyA).lerp(skyB, targetSignal01);
+    fog.color.copy(bgColor);
     scene.background = bgColor;
     scene.fog = fog;
-    return () => {
-      // Cleanup: prevent stale references if Canvas ever unmounts.
-      if (scene.background === bgColor) scene.background = null;
-      if (scene.fog === fog) scene.fog = null;
-    };
-  }, [scene, bgColor, fog]);
 
-  // Subscribe once: bridge updates mutate refs only.
-  useEffect(() => {
-    const bridge = bridgeRef.current;
+    // Smooth signal bar
+    signalVisRef.current = lerp(signalVisRef.current, targetSignal01, 1 - Math.pow(0.001, dt));
+    const bar = signalBarRef.current;
+    if (bar) {
+      const w = lerp(0.2, 6.0, signalVisRef.current);
+      bar.scale.x = w;
+      bar.position.x = -3 + w / 2;
 
-    const sync = () => {
-      const b = bridgeRef.current;
-      runtimeRef.current.flags = normalizeFlags(b.flags);
-      runtimeRef.current.captured = b.captured;
-      runtimeRef.current.onCapture = b.onCapture;
-    };
+      const m = bar.material as THREE.MeshStandardMaterial | undefined;
+      if (m) {
+        m.emissiveIntensity = lerp(0.6, 2.0, signalVisRef.current);
+      }
+    }
 
-    sync();
-    return bridge.subscribe(sync);
-  }, [bridgeRef]);
+    // Nodes: smooth per-node signal/volatility; animate imperatively
+    const nodes = (s.nodes && s.nodes.length > 0 ? s.nodes : FALLBACK_NODES) as RedLedgerNode[];
+    for (const n of nodes) {
+      const mesh = nodeMeshRefs.current[n.id];
+      if (!mesh) continue;
 
-  // Apply background/fog tint from runtime state.
-  useFrame(() => {
-    const tint = runtimeRef.current.flags.skyTint;
-    bgColor.set(tint);
-    fog.color.set(tint);
-  });
+      const base = nodeBasePosRefs.current[n.id];
+      if (!base) continue;
 
-  const controlsRef = useRef<any>(null);
-  useFrame(() => {
-    const controls = controlsRef.current;
-    if (!controls) return;
-    controls.autoRotate = runtimeRef.current.captured.size === 0;
-    controls.autoRotateSpeed = 0.5;
+      const vis = nodeVisRefs.current[n.id] ?? { signal: targetSignal01, volatility: 0 };
+      const targetSig = clamp01(typeof n.signal === "number" ? n.signal : targetSignal01);
+      const targetVol = clamp01(typeof n.volatility === "number" ? n.volatility : 0);
+
+      vis.signal = lerp(vis.signal, targetSig, 1 - Math.pow(0.002, dt));
+      vis.volatility = lerp(vis.volatility, targetVol, 1 - Math.pow(0.002, dt));
+      nodeVisRefs.current[n.id] = vis;
+
+      const isCaptured = Boolean(n.captured);
+
+      const t = clock.getElapsedTime();
+      const pulse = 0.5 + 0.5 * Math.sin(t * (1.2 + vis.volatility * 3) + n.id.length);
+
+      const scaleTarget = isCaptured
+        ? 1.15
+        : lerp(0.95, 1.1, vis.signal) * lerp(0.98, 1.08, pulse);
+
+      const sLerp = lerp(mesh.scale.x, scaleTarget, 1 - Math.pow(0.002, dt));
+      mesh.scale.setScalar(sLerp);
+
+      mesh.position.set(
+        base.x,
+        base.y + Math.sin(t * (0.9 + vis.volatility * 2) + pulse) * 0.25,
+        base.z
+      );
+      mesh.rotation.y += dt * (0.25 + vis.volatility * 0.8);
+
+      const mat = nodeMaterialRefs.current[n.id];
+      if (!mat) continue;
+      mat.emissiveIntensity = isCaptured
+        ? 1.7
+        : lerp(0.9, 1.6, vis.signal) * lerp(0.9, 1.1, pulse);
+    }
   });
 
   return (
     <>
+      {/* Lights */}
       <ambientLight intensity={0.3} />
-      <pointLight position={[10, 10, 10]} intensity={0.5} color="#00ffff" />
-      <pointLight position={[-10, 5, -10]} intensity={0.3} color="#ff0044" />
+      <pointLight position={[10, 10, 10]} intensity={0.55} color="#00ffff" />
+      <pointLight position={[-10, 5, -10]} intensity={0.35} color="#ff0044" />
 
+      {/* Background stars */}
       <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
 
+      {/* Neon grid floor */}
       <Grid
         args={[40, 40]}
         cellSize={1}
@@ -274,20 +216,64 @@ export default function SceneRoot() {
         infiniteGrid
       />
 
-      {nodes.map((def, idx) => (
-        <LiquidityNode
-          key={def.id}
-          def={def}
-          sphereGeom={sphereGeom}
-          matFree={matFree}
-          matCaptured={matCaptured}
-          runtimeRef={runtimeRef}
-          seed={idx * 1.7}
-        />
+      {/* 3D signal bar */}
+      <group position={[-3, 4.7, -2]}>
+        <mesh position={[3, 0, 0]}>
+          <boxGeometry args={[6.2, 0.18, 0.18]} />
+          <meshStandardMaterial color="#0b1220" emissive="#0b1220" emissiveIntensity={0.3} />
+        </mesh>
+        <mesh ref={signalBarRef} position={[0, 0, 0]}>
+          <boxGeometry args={[1, 0.12, 0.12]} />
+          <meshStandardMaterial color="#00ffff" emissive="#00ffff" emissiveIntensity={1.2} toneMapped={false} />
+        </mesh>
+      </group>
+
+      {/* Nodes (created once; updated imperatively) */}
+      {initialNodes.map((n) => (
+        <mesh
+          key={n.id}
+          ref={(el) => {
+            nodeMeshRefs.current[n.id] = el;
+            if (!el) return;
+
+            // Per-node stable material (avoid shared material mutation)
+            if (!nodeMaterialRefs.current[n.id]) {
+              const m = matBase.clone();
+              el.material = m;
+              nodeMaterialRefs.current[n.id] = m;
+            }
+
+            // Base position (stable Vector3)
+            if (!nodeBasePosRefs.current[n.id]) {
+              const p = n.position ?? [0, 0, 0];
+              nodeBasePosRefs.current[n.id] = new THREE.Vector3(p[0], p[1], p[2]);
+            }
+
+            // Seed vis values
+            if (!nodeVisRefs.current[n.id]) {
+              nodeVisRefs.current[n.id] = {
+                signal: clamp01(typeof n.signal === "number" ? n.signal : 0),
+                volatility: clamp01(typeof n.volatility === "number" ? n.volatility : 0),
+              };
+            }
+          }}
+          position={n.position}
+          onClick={() => {
+            // Optional interaction hook: capture node in store (does not touch React tree)
+            const s = RedLedgerStore.getState();
+            const nodes = (s.nodes && s.nodes.length > 0 ? s.nodes : FALLBACK_NODES).map((x) =>
+              x.id === n.id ? { ...x, captured: true } : x
+            );
+            RedLedgerStore.setState({ nodes });
+          }}
+        >
+          <primitive object={sphereGeom} attach="geometry" />
+          {/* material is set imperatively in ref callback */}
+          <pointLight color="#ff0044" intensity={0.0} distance={5} />
+        </mesh>
       ))}
 
       <OrbitControls
-        ref={controlsRef}
         enableZoom
         enablePan={false}
         minDistance={5}
@@ -297,3 +283,5 @@ export default function SceneRoot() {
     </>
   );
 }
+
+export default memo(SceneRootImpl);
