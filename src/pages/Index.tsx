@@ -64,10 +64,15 @@ function LiquidityNode({
   );
 }
 
-function Scene() {
-  const { flags, captureNode, isLoading, error } = useRedLedgerControl();
-  const [capturedNodes, setCapturedNodes] = useState<Set<string>>(new Set());
-  
+interface SceneProps {
+  skyTint: string;
+  volatility: number;
+  spawnRateMultiplier: number;
+  capturedNodes: Set<string>;
+  onCapture: (nodeId: string) => void;
+}
+
+function Scene({ skyTint, volatility, spawnRateMultiplier, capturedNodes, onCapture }: SceneProps) {
   const nodes = [
     { position: [-4, 2, 0] as [number, number, number], id: 'node-0' },
     { position: [-2, 1.5, 3] as [number, number, number], id: 'node-1' },
@@ -75,20 +80,6 @@ function Scene() {
     { position: [2, 1.8, 2] as [number, number, number], id: 'node-3' },
     { position: [4, 2.2, -1] as [number, number, number], id: 'node-4' },
   ];
-
-  const handleCapture = async (uniqueId: string) => {
-    try {
-      await captureNode(uniqueId);
-      setCapturedNodes((prev) => new Set([...prev, uniqueId]));
-    } catch (err) {
-      console.error('Failed to capture node:', err);
-    }
-  };
-
-  const signalPercent = Math.round((capturedNodes.size / nodes.length) * 100);
-
-  // Convert hex color to RGB for Three.js color
-  const skyTint = flags.skyTint || '#0a0a0f';
 
   return (
     <>
@@ -135,9 +126,9 @@ function Scene() {
           key={node.id}
           position={node.position}
           isCaptured={capturedNodes.has(node.id)}
-          onCapture={() => handleCapture(node.id)}
-          volatility={flags.volatility}
-          spawnRateMultiplier={flags.spawnRateMultiplier}
+          onCapture={() => onCapture(node.id)}
+          volatility={volatility}
+          spawnRateMultiplier={spawnRateMultiplier}
           uniqueId={node.id}
         />
       ))}
@@ -152,6 +143,50 @@ function Scene() {
         autoRotate={!capturedNodes.size}
         autoRotateSpeed={0.5}
       />
+    </>
+  );
+}
+
+const Index = () => {
+  const { flags, captureNode, isLoading, error } = useRedLedgerControl();
+  const [capturedNodes, setCapturedNodes] = useState<Set<string>>(new Set());
+  
+  const nodes = [
+    { position: [-4, 2, 0] as [number, number, number], id: 'node-0' },
+    { position: [-2, 1.5, 3] as [number, number, number], id: 'node-1' },
+    { position: [0, 2.5, -2] as [number, number, number], id: 'node-2' },
+    { position: [2, 1.8, 2] as [number, number, number], id: 'node-3' },
+    { position: [4, 2.2, -1] as [number, number, number], id: 'node-4' },
+  ];
+
+  const handleCapture = async (nodeId: string) => {
+    try {
+      await captureNode(nodeId);
+      setCapturedNodes((prev) => new Set([...prev, nodeId]));
+    } catch (err) {
+      console.error('Failed to capture node:', err);
+    }
+  };
+
+  const signalPercent = Math.round((capturedNodes.size / nodes.length) * 100);
+  const skyTint = flags.skyTint || '#0a0a0f';
+
+  return (
+    <div className="w-full h-screen bg-black overflow-hidden relative">
+      {/* Canvas container */}
+      <Canvas
+        camera={{ position: [0, 5, 10], fov: 75 }}
+        dpr={[1, 2]}
+        performance={{ min: 0.5 }}
+      >
+        <Scene 
+          skyTint={skyTint}
+          volatility={flags.volatility}
+          spawnRateMultiplier={flags.spawnRateMultiplier}
+          capturedNodes={capturedNodes}
+          onCapture={handleCapture}
+        />
+      </Canvas>
 
       {/* HUD Overlay */}
       <div className="absolute top-4 left-4 pointer-events-none">
@@ -195,20 +230,6 @@ function Scene() {
           CLICK NODES TO CAPTURE • DRAG TO ROTATE
         </p>
       </div>
-    </>
-  );
-}
-
-const Index = () => {
-  return (
-    <div className="w-full h-screen bg-black overflow-hidden">
-      <Canvas
-        camera={{ position: [0, 5, 10], fov: 75 }}
-        dpr={[1, 2]}
-        performance={{ min: 0.5 }}
-      >
-        <Scene />
-      </Canvas>
     </div>
   );
 };
