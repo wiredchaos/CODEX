@@ -1,8 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fetchJson } from '@/lib/fetchJson';
 
-const RELAY_BASE_URL = ((import.meta.env.VITE_RELAY_URL || import.meta.env.VITE_BASE44_DOMAIN || '') as string)
-  .replace(/\/$/, '');
+// IMPORTANT: Never fall back to relative URLs in production.
+// If this is empty, relay calls are disabled (prevents HTML-as-JSON on Vercel SPA fallback).
+const RELAY_BASE_URL = String(import.meta.env.VITE_RELAY_URL || '').replace(/\/$/, '');
+
+if (!RELAY_BASE_URL) {
+  console.warn('No VITE_RELAY_URL defined. Relay calls disabled.');
+}
 
 export interface RedLedgerFlags {
   skyTint: string;
@@ -81,8 +86,10 @@ export function useRedLedgerControl() {
     }
   }, [fetchFlags]);
 
-  // Poll flags every 3 seconds
+  // Poll flags every 3 seconds (only if relay URL is configured)
   useEffect(() => {
+    if (!RELAY_BASE_URL) return;
+
     fetchFlags();
 
     const intervalId = setInterval(() => {
