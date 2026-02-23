@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { RedLedgerState, RedLedgerEvents, Faction } from '@/types/redledger';
+import { fetchJson } from '@/lib/fetchJson';
 
 interface RedLedgerData {
   state: RedLedgerState | null;
@@ -36,20 +37,10 @@ export function useRedLedgerData(config: Config | null) {
       const { relayBaseUrl, appId } = config;
       const baseUrl = relayBaseUrl.replace(/\/$/, '');
 
-      const [stateRes, eventsRes, factionsRes] = await Promise.all([
-        fetch(`${baseUrl}/api/redledger/state?appId=${appId}`),
-        fetch(`${baseUrl}/api/redledger/events?appId=${appId}`),
-        fetch(`${baseUrl}/api/redledger/factions?appId=${appId}`),
-      ]);
-
-      if (!stateRes.ok || !eventsRes.ok || !factionsRes.ok) {
-        throw new Error('Failed to fetch data from RedLedger Relay Core');
-      }
-
       const [state, events, factions] = await Promise.all([
-        stateRes.json(),
-        eventsRes.json(),
-        factionsRes.json(),
+        fetchJson<RedLedgerState>(`${baseUrl}/api/redledger/state?appId=${encodeURIComponent(appId)}`),
+        fetchJson<RedLedgerEvents>(`${baseUrl}/api/redledger/events?appId=${encodeURIComponent(appId)}`),
+        fetchJson<Faction[]>(`${baseUrl}/api/redledger/factions?appId=${encodeURIComponent(appId)}`),
       ]);
 
       setData((prev) => ({
@@ -77,7 +68,7 @@ export function useRedLedgerData(config: Config | null) {
 
     const { relayBaseUrl, appId } = config;
     const baseUrl = relayBaseUrl.replace(/\/$/, '');
-    const streamUrl = `${baseUrl}/api/redledger/stream?appId=${appId}`;
+    const streamUrl = `${baseUrl}/api/redledger/stream?appId=${encodeURIComponent(appId)}`;
 
     sseRef.current = new EventSource(streamUrl);
 

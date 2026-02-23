@@ -5,6 +5,7 @@ import { applyRelaySnapshot, RedLedgerStore, type RedLedgerNode } from "@/RedLed
 import { ConfigPanel } from "@/components/ConfigPanel";
 import { useRedLedgerConfig } from "@/hooks/useRedLedgerConfig";
 import { Badge } from "@/components/ui/badge";
+import { fetchJson } from "@/lib/fetchJson";
 
 const DEFAULT_NODES: RedLedgerNode[] = [
   { id: "node-0", position: [-4, 2, 0], signal: 0.25, volatility: 0.2 },
@@ -28,6 +29,11 @@ export default function FieldOps() {
   const [connected, setConnected] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
 
+  // Prefer user-configured relay, but allow env-based configuration for deployments.
+  const relayBaseUrl = (config.relayBaseUrl || import.meta.env.VITE_RELAY_URL || "").trim();
+  const appId = (config.appId || import.meta.env.VITE_RELAY_APP_ID || "").trim();
+  const canSync = (isValid || Boolean(import.meta.env.VITE_RELAY_URL)) && relayBaseUrl !== "" && appId !== "";
+
   // Seed nodes once (store does not cause React re-renders unless subscribed).
   useEffect(() => {
     const s = RedLedgerStore.getState();
@@ -41,30 +47,19 @@ export default function FieldOps() {
     setConnected(false);
     setSyncError(null);
 
-    if (!isValid) return;
+    if (!canSync) return;
 
-    const baseUrl = config.relayBaseUrl.replace(/\/$/, "");
-    const appId = config.appId;
+    const baseUrl = relayBaseUrl.replace(/\/$/, "");
 
     let alive = true;
     let es: EventSource | null = null;
 
     const fetchInitial = async () => {
       try {
-        const [stateRes, eventsRes, factionsRes] = await Promise.all([
-          fetch(`${baseUrl}/api/redledger/state?appId=${appId}`),
-          fetch(`${baseUrl}/api/redledger/events?appId=${appId}`),
-          fetch(`${baseUrl}/api/redledger/factions?appId=${appId}`),
-        ]);
-
-        if (!stateRes.ok || !eventsRes.ok || !factionsRes.ok) {
-          throw new Error("Failed to fetch initial RedLedger snapshot");
-        }
-
         const [state, events, factions] = await Promise.all([
-          stateRes.json(),
-          eventsRes.json(),
-          factionsRes.json(),
+          fetchJson<any>(`${baseUrl}/api/redledger/state?appId=${encodeURIComponent(appId)}`),
+          fetchJson<any>(`${baseUrl}/api/redledger/events?appId=${encodeURIComponent(appId)}`),
+          fetchJson<any>(`${baseUrl}/api/redledger/factions?appId=${encodeURIComponent(appId)}`),
         ]);
 
         if (!alive) return;
@@ -78,7 +73,7 @@ export default function FieldOps() {
     fetchInitial();
 
     try {
-      es = new EventSource(`${baseUrl}/api/redledger/stream?appId=${appId}`);
+      es = new EventSource(`${baseUrl}/api/redledger/stream?appId=${encodeURIComponent(appId)}`);
       es.onopen = () => {
         if (!alive) return;
         setConnected(true);
@@ -111,7 +106,7 @@ export default function FieldOps() {
       alive = false;
       es?.close();
     };
-  }, [config.appId, config.relayBaseUrl, isValid]);
+  }, [appId, canSync, relayBaseUrl]);
 
   // Memoize Canvas subtree so React HUD re-renders do not touch the R3F tree.
   const canvasLayer = useMemo(
@@ -144,7 +139,7 @@ export default function FieldOps() {
               variant="outline"
               className="border-cyan-500/40 bg-black/40 text-cyan-200 font-mono"
             >
-              {connected ? "LIVE" : isValid ? "OFFLINE" : "CONFIG"}
+              {connected ? "LIVE" : canSync ? "OFFLINE" : "CONFIG"}
             </Badge>
             {snap.worldVersion ? (
               <Badge variant="outline" className="border-white/10 bg-black/40 text-white/80 font-mono">
@@ -152,7 +147,7 @@ export default function FieldOps() {
               </Badge>
             ) : null}
           </div>
-          {syncError ? <div className="text-xs text-red-300">{syncError}</div> : null}
+          {syncError ? <div className="text-xs text-red-300 max-w-sm">API ERROR: {syncError}</div> : null}
         </div>
       </div>
 
@@ -164,7 +159,7 @@ export default function FieldOps() {
           <div className="text-xs text-white/70">NODES CAPTURED: {nodesCaptured}/{(snap.nodes || []).length}</div>
           <div className="text-xs text-white/60">FACTIONS: {(snap.factions || []).length}</div>
           <div className="text-[11px] text-white/50 max-w-xs">
-            {isValid ? "Streaming world updates into the scene store." : "Open settings to connect to a relay."}
+            {canSync ? `Relay: ${relayBaseUrl}` : "Open settings to connect to a relay."}
           </div>
         </div>
       </div>

@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
+import { fetchJson } from '@/lib/fetchJson';
 
-const BASE_URL = import.meta.env.VITE_BASE44_DOMAIN || '';
+const RELAY_BASE_URL = ((import.meta.env.VITE_RELAY_URL || import.meta.env.VITE_BASE44_DOMAIN || '') as string)
+  .replace(/\/$/, '');
 
 export interface RedLedgerFlags {
   skyTint: string;
@@ -25,16 +27,16 @@ export function useRedLedgerControl() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchFlags = useCallback(async () => {
+    if (!RELAY_BASE_URL) {
+      setError('Relay URL not configured (VITE_RELAY_URL).');
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
-      
-      const response = await fetch(`${BASE_URL}/api/redledger/flags`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch flags: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
+
+      const data = await fetchJson<RedLedgerFlags>(`${RELAY_BASE_URL}/api/redledger/flags`);
       setFlags(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch flags');
@@ -42,14 +44,19 @@ export function useRedLedgerControl() {
     } finally {
       setIsLoading(false);
     }
-  }, [BASE_URL]);
+  }, []);
 
   const captureNode = useCallback(async (nodeId: string) => {
+    if (!RELAY_BASE_URL) {
+      setError('Relay URL not configured (VITE_RELAY_URL).');
+      throw new Error('Relay URL not configured');
+    }
+
     try {
       setIsLoading(true);
       setError(null);
-      
-      const response = await fetch(`${BASE_URL}/api/redledger/capture`, {
+
+      const data = await fetchJson<CaptureResponse>(`${RELAY_BASE_URL}/api/redledger/capture`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -60,17 +67,11 @@ export function useRedLedgerControl() {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to capture node: ${response.statusText}`);
-      }
-
-      const data: CaptureResponse = await response.json();
-      
       // Refetch flags after successful capture
       if (data.success) {
         await fetchFlags();
       }
-      
+
       return data;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to capture node');
@@ -78,12 +79,12 @@ export function useRedLedgerControl() {
     } finally {
       setIsLoading(false);
     }
-  }, [BASE_URL, fetchFlags]);
+  }, [fetchFlags]);
 
   // Poll flags every 3 seconds
   useEffect(() => {
     fetchFlags();
-    
+
     const intervalId = setInterval(() => {
       fetchFlags();
     }, 3000);
