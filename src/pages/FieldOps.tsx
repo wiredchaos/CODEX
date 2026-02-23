@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Grid, Float, Stars } from '@react-three/drei';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { useRedLedgerControl } from '@/hooks/useRedLedgerControl';
 
@@ -150,6 +150,14 @@ function Scene({ skyTint, volatility, spawnRateMultiplier, capturedNodes, onCapt
 const FieldOps = () => {
   const { flags, captureNode, isLoading, error } = useRedLedgerControl();
   const [capturedNodes, setCapturedNodes] = useState<Set<string>>(new Set());
+  const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Wait for initial load
+  useEffect(() => {
+    if (!isLoading) {
+      setIsInitialized(true);
+    }
+  }, [isLoading]);
   
   const nodes = [
     { position: [-4, 2, 0] as [number, number, number], id: 'node-0' },
@@ -169,24 +177,32 @@ const FieldOps = () => {
   };
 
   const signalPercent = Math.round((capturedNodes.size / nodes.length) * 100);
-  const skyTint = flags.skyTint || '#0a0a0f';
+  
+  // Ensure flags always has default values
+  const safeFlags = {
+    skyTint: flags?.skyTint || '#0a0a0f',
+    volatility: flags?.volatility ?? 1,
+    spawnRateMultiplier: flags?.spawnRateMultiplier ?? 1,
+  };
 
   return (
     <div className="w-full h-screen bg-black overflow-hidden relative">
       {/* Canvas container */}
-      <Canvas
-        camera={{ position: [0, 5, 10], fov: 75 }}
-        dpr={[1, 2]}
-        performance={{ min: 0.5 }}
-      >
-        <Scene 
-          skyTint={skyTint}
-          volatility={flags.volatility}
-          spawnRateMultiplier={flags.spawnRateMultiplier}
-          capturedNodes={capturedNodes}
-          onCapture={handleCapture}
-        />
-      </Canvas>
+      {isInitialized && (
+        <Canvas
+          camera={{ position: [0, 5, 10], fov: 75 }}
+          dpr={[1, 2]}
+          performance={{ min: 0.5 }}
+        >
+          <Scene 
+            skyTint={safeFlags.skyTint}
+            volatility={safeFlags.volatility}
+            spawnRateMultiplier={safeFlags.spawnRateMultiplier}
+            capturedNodes={capturedNodes}
+            onCapture={handleCapture}
+          />
+        </Canvas>
+      )}
 
       {/* HUD Overlay */}
       <div className="absolute top-4 left-4 pointer-events-none">
@@ -198,10 +214,10 @@ const FieldOps = () => {
             NODES CAPTURED: {capturedNodes.size}/{nodes.length}
           </div>
           <div className="text-xs text-gray-400">
-            VOLATILITY: {flags.volatility.toFixed(2)}
+            VOLATILITY: {safeFlags.volatility.toFixed(2)}
           </div>
           <div className="text-xs text-gray-400">
-            SPAWN RATE: {flags.spawnRateMultiplier.toFixed(2)}x
+            SPAWN RATE: {safeFlags.spawnRateMultiplier.toFixed(2)}x
           </div>
         </div>
       </div>

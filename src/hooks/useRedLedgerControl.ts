@@ -8,17 +8,19 @@ export interface RedLedgerFlags {
   spawnRateMultiplier: number;
 }
 
+const DEFAULT_FLAGS: RedLedgerFlags = {
+  skyTint: '#0a0a0f',
+  volatility: 1,
+  spawnRateMultiplier: 1,
+};
+
 export interface CaptureResponse {
   success: boolean;
   flags?: RedLedgerFlags;
 }
 
 export function useRedLedgerControl() {
-  const [flags, setFlags] = useState<RedLedgerFlags>({
-    skyTint: '#0a0a0f',
-    volatility: 1,
-    spawnRateMultiplier: 1,
-  });
+  const [flags, setFlags] = useState<RedLedgerFlags>(DEFAULT_FLAGS);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
