@@ -2,10 +2,10 @@ import { Canvas } from "@react-three/fiber";
 import { useEffect, useMemo, useSyncExternalStore, useState } from "react";
 import SceneRoot from "@/components/SceneRoot";
 import { applyRelaySnapshot, RedLedgerStore, type RedLedgerNode } from "@/RedLedgerStore";
-import { ConfigPanel } from "@/components/ConfigPanel";
-import { useRedLedgerConfig } from "@/hooks/useRedLedgerConfig";
 import { Badge } from "@/components/ui/badge";
 import { fetchJson } from "@/lib/fetchJson";
+import { getAppId, getRelayBase, isRelayConfigured, relayUrl } from "@/core/relay";
+import { RelayDiagnostics, RelayNotConfiguredBanner } from "@/components/RelayDiagnostics";
 
 const DEFAULT_NODES: RedLedgerNode[] = [
   { id: "node-0", position: [-4, 2, 0], signal: 0.25, volatility: 0.2 },
@@ -24,15 +24,11 @@ function useRedLedgerSnapshot() {
 }
 
 export default function FieldOps() {
-  const { config, isValid } = useRedLedgerConfig();
   const snap = useRedLedgerSnapshot();
   const [connected, setConnected] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
 
-  // Prefer user-configured relay, but allow env-based configuration for deployments.
-  const relayBaseUrl = (config.relayBaseUrl || import.meta.env.VITE_RELAY_URL || "").trim();
-  const appId = (config.appId || import.meta.env.VITE_RELAY_APP_ID || "").trim();
-  const canSync = (isValid || Boolean(import.meta.env.VITE_RELAY_URL)) && relayBaseUrl !== "" && appId !== "";
+  const relayReady = isRelayConfigured();
 
   // Seed nodes once (store does not cause React re-renders unless subscribed).
   useEffect(() => {
@@ -47,19 +43,28 @@ export default function FieldOps() {
     setConnected(false);
     setSyncError(null);
 
-    if (!canSync) return;
+    if (!relayReady) return;
 
-    const baseUrl = relayBaseUrl.replace(/\/$/, "");
+    let baseUrl = "";
+    let appId = "";
+    try {
+      baseUrl = getRelayBase();
+      appId = getAppId();
+    } catch (e) {
+      setSyncError(e instanceof Error ? e.message : "Relay not configured");
+      return;
+    }
 
     let alive = true;
     let es: EventSource | null = null;
 
     const fetchInitial = async () => {
       try {
+        const q = `?appId=${encodeURIComponent(appId)}`;
         const [state, events, factions] = await Promise.all([
-          fetchJson<any>(`${baseUrl}/api/redledger/state?appId=${encodeURIComponent(appId)}`),
-          fetchJson<any>(`${baseUrl}/api/redledger/events?appId=${encodeURIComponent(appId)}`),
-          fetchJson<any>(`${baseUrl}/api/redledger/factions?appId=${encodeURIComponent(appId)}`),
+          fetchJson<any>(relayUrl(`/api/redledger/state${q}`)),
+          fetchJson<any>(relayUrl(`/api/redledger/events${q}`)),
+          fetchJson<any>(relayUrl(`/api/redledger/factions${q}`)),
         ]);
 
         if (!alive) return;
@@ -73,7 +78,7 @@ export default function FieldOps() {
     fetchInitial();
 
     try {
-      es = new EventSource(`${baseUrl}/api/redledger/stream?appId=${encodeURIComponent(appId)}`);
+      es = new EventSource(relayUrl(`/api/redledger/stream?appId=${encodeURIComponent(appId)}`));
       es.onopen = () => {
         if (!alive) return;
         setConnected(true);
@@ -85,7 +90,6 @@ export default function FieldOps() {
           const update = JSON.parse(event.data);
           applyRelaySnapshot(update);
         } catch (e) {
-          // Ignore malformed frames; keep scene alive.
           console.error("Failed to parse SSE message", e);
         }
       };
@@ -106,7 +110,7 @@ export default function FieldOps() {
       alive = false;
       es?.close();
     };
-  }, [appId, canSync, relayBaseUrl]);
+  }, [relayReady]);
 
   // Memoize Canvas subtree so React HUD re-renders do not touch the R3F tree.
   const canvasLayer = useMemo(
@@ -125,21 +129,23 @@ export default function FieldOps() {
       {/* Canvas must NEVER be conditionally rendered */}
       {canvasLayer}
 
-      {/* HUD Overlay (React-driven, separate subscription, does not affect Canvas tree) */}
+      {/* Runtime diagnostics + status */}
       <div className="absolute top-4 left-4 right-4 flex items-start justify-between gap-3 pointer-events-none">
-        <div className="pointer-events-auto">
-          <ConfigPanel />
+        <div className="pointer-events-none max-w-[520px]">
+          <RelayNotConfiguredBanner className="shadow-[0_0_0_1px_rgba(0,0,0,0.4)]" />
         </div>
 
         <div className="flex-1" />
 
-        <div className="pointer-events-none text-right space-y-1">
+        <div className="pointer-events-none text-right space-y-2">
           <div className="flex items-center justify-end gap-2">
             <Badge
               variant="outline"
-              className="border-cyan-500/40 bg-black/40 text-cyan-200 font-mono"
+              className={`border-white/10 bg-black/40 font-mono ${
+                connected ? "text-emerald-200" : relayReady ? "text-amber-200" : "text-white/60"
+              }`}
             >
-              {connected ? "LIVE" : canSync ? "OFFLINE" : "CONFIG"}
+              {connected ? "LIVE" : relayReady ? "OFFLINE" : "DISABLED"}
             </Badge>
             {snap.worldVersion ? (
               <Badge variant="outline" className="border-white/10 bg-black/40 text-white/80 font-mono">
@@ -147,20 +153,20 @@ export default function FieldOps() {
               </Badge>
             ) : null}
           </div>
+
+          <RelayDiagnostics />
+
           {syncError ? <div className="text-xs text-red-300 max-w-sm">API ERROR: {syncError}</div> : null}
         </div>
       </div>
 
-      <div className="absolute top-20 left-4 pointer-events-none">
-        <div className="bg-black/80 border border-cyan-500/50 p-4 rounded-2xl backdrop-blur-sm space-y-2">
-          <div className="font-mono text-2xl text-cyan-300 font-bold tracking-wide">
+      <div className="absolute top-24 left-4 pointer-events-none">
+        <div className="bg-black/80 border border-cyan-500/40 p-4 rounded-2xl backdrop-blur-sm space-y-2">
+          <div className="font-mono text-2xl text-cyan-200 font-bold tracking-wide">
             SIGNAL: {Math.round(snap.globalSignal || 0)}
           </div>
           <div className="text-xs text-white/70">NODES CAPTURED: {nodesCaptured}/{(snap.nodes || []).length}</div>
           <div className="text-xs text-white/60">FACTIONS: {(snap.factions || []).length}</div>
-          <div className="text-[11px] text-white/50 max-w-xs">
-            {canSync ? `Relay: ${relayBaseUrl}` : "Open settings to connect to a relay."}
-          </div>
         </div>
       </div>
 

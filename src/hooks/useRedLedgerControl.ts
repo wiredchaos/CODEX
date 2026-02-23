@@ -1,13 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fetchJson } from '@/lib/fetchJson';
-
-// IMPORTANT: Never fall back to relative URLs in production.
-// If this is empty, relay calls are disabled (prevents HTML-as-JSON on Vercel SPA fallback).
-const RELAY_BASE_URL = String(import.meta.env.VITE_RELAY_URL || '').replace(/\/$/, '');
-
-if (!RELAY_BASE_URL) {
-  console.warn('No VITE_RELAY_URL defined. Relay calls disabled.');
-}
+import { isRelayConfigured, relayUrl } from '@/core/relay';
 
 export interface RedLedgerFlags {
   skyTint: string;
@@ -29,11 +22,13 @@ export interface CaptureResponse {
 export function useRedLedgerControl() {
   const [flags, setFlags] = useState<RedLedgerFlags>(DEFAULT_FLAGS);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(() =>
+    isRelayConfigured() ? null : 'RELAY NOT CONFIGURED – BUILD ENV INVALID'
+  );
 
   const fetchFlags = useCallback(async () => {
-    if (!RELAY_BASE_URL) {
-      setError('Relay URL not configured (VITE_RELAY_URL).');
+    if (!isRelayConfigured()) {
+      setError('RELAY NOT CONFIGURED – BUILD ENV INVALID');
       return;
     }
 
@@ -41,7 +36,7 @@ export function useRedLedgerControl() {
       setIsLoading(true);
       setError(null);
 
-      const data = await fetchJson<RedLedgerFlags>(`${RELAY_BASE_URL}/api/redledger/flags`);
+      const data = await fetchJson<RedLedgerFlags>(relayUrl(`/api/redledger/flags`));
       setFlags(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch flags');
@@ -52,16 +47,16 @@ export function useRedLedgerControl() {
   }, []);
 
   const captureNode = useCallback(async (nodeId: string) => {
-    if (!RELAY_BASE_URL) {
-      setError('Relay URL not configured (VITE_RELAY_URL).');
-      throw new Error('Relay URL not configured');
+    if (!isRelayConfigured()) {
+      setError('RELAY NOT CONFIGURED – BUILD ENV INVALID');
+      throw new Error('RELAY NOT CONFIGURED – BUILD ENV INVALID');
     }
 
     try {
       setIsLoading(true);
       setError(null);
 
-      const data = await fetchJson<CaptureResponse>(`${RELAY_BASE_URL}/api/redledger/capture`, {
+      const data = await fetchJson<CaptureResponse>(relayUrl(`/api/redledger/capture`), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,9 +81,9 @@ export function useRedLedgerControl() {
     }
   }, [fetchFlags]);
 
-  // Poll flags every 3 seconds (only if relay URL is configured)
+  // Poll flags every 3 seconds (only if relay is configured)
   useEffect(() => {
-    if (!RELAY_BASE_URL) return;
+    if (!isRelayConfigured()) return;
 
     fetchFlags();
 

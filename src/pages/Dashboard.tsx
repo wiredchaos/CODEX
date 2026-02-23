@@ -1,33 +1,31 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ConfigPanel } from "@/components/ConfigPanel";
 import { SignalBar } from "@/components/SignalBar";
 import { EventsList } from "@/components/EventsList";
 import { useRedLedgerData } from "@/hooks/useRedLedgerData";
-import { useRedLedgerConfig } from "@/hooks/useRedLedgerConfig";
-import { 
-  Activity, 
-  Globe, 
-  Users, 
-  AlertCircle, 
+import {
+  Activity,
+  Globe,
+  Users,
+  AlertCircle,
   CheckCircle2,
-  Signal
+  Signal,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { RelayDiagnostics, RelayNotConfiguredBanner } from "@/components/RelayDiagnostics";
+import { isRelayConfigured } from "@/core/relay";
 
 export default function Dashboard() {
-  const { config, isValid } = useRedLedgerConfig();
-  const { state, events, factions, isLoading, error, connected } = useRedLedgerData(
-    isValid ? config : null
-  );
+  const { state, events, factions, isLoading, error, connected } = useRedLedgerData();
+  const relayReady = isRelayConfigured();
 
   return (
     <div className="min-h-screen bg-black text-gray-100">
       {/* Header */}
       <header className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 bg-red-500 rounded-lg flex items-center justify-center">
+              <div className="h-8 w-8 bg-red-500 rounded-xl flex items-center justify-center">
                 <Signal className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -35,49 +33,55 @@ export default function Dashboard() {
                 <p className="text-xs text-gray-500">Relay Dashboard</p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              {isValid && (
+
+            <div className="hidden md:block">
+              <RelayDiagnostics />
+            </div>
+
+            <div className="flex items-center gap-3">
+              {relayReady && (
                 <div className="flex items-center gap-2">
                   {connected ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                   ) : (
-                    <AlertCircle className="h-4 w-4 text-red-500" />
+                    <AlertCircle className="h-4 w-4 text-amber-400" />
                   )}
                   <span className="text-sm text-gray-400">
                     {connected ? "Connected" : "Disconnected"}
                   </span>
                 </div>
               )}
-              <ConfigPanel />
+              <Badge variant="outline" className="border-white/10 bg-black/40 text-white/70 font-mono">
+                {relayReady ? (connected ? "SSE" : "POLL") : "DISABLED"}
+              </Badge>
             </div>
+          </div>
+
+          <div className="mt-3 md:hidden">
+            <RelayDiagnostics className="justify-start" />
+          </div>
+
+          <div className="mt-3">
+            <RelayNotConfiguredBanner />
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        {!isValid ? (
-          /* Setup Prompt */
-          <Card className="max-w-md mx-auto">
+        {!relayReady ? (
+          <Card className="max-w-xl mx-auto border-amber-500/20 bg-gray-900/40">
             <CardHeader className="text-center">
-              <div className="h-16 w-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Globe className="h-8 w-8 text-gray-600" />
+              <div className="h-16 w-16 bg-amber-500/10 border border-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Globe className="h-8 w-8 text-amber-200" />
               </div>
-              <CardTitle>Configure Your Connection</CardTitle>
-              <CardDescription>
-                Enter your RedLedger Relay Core details to start monitoring
+              <CardTitle className="text-amber-200">Relay Not Configured</CardTitle>
+              <CardDescription className="text-gray-400">
+                This build is missing <span className="font-mono">VITE_RELAY_URL</span> and/or <span className="font-mono">VITE_RELAY_APP_ID</span>.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <button
-                onClick={() => {
-                  const panel = document.querySelector('[data-radix-dialog-trigger]') as HTMLElement;
-                  panel?.click();
-                }}
-                className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg font-medium transition-colors"
-              >
-                Open Configuration
-              </button>
+            <CardContent className="text-sm text-gray-300">
+              No network calls will be attempted.
             </CardContent>
           </Card>
         ) : isLoading ? (
@@ -94,17 +98,10 @@ export default function Dashboard() {
             <CardHeader className="text-center">
               <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
               <CardTitle className="text-red-500">Connection Error</CardTitle>
-              <CardDescription className="text-gray-400">
-                {error}
-              </CardDescription>
+              <CardDescription className="text-gray-400">{error}</CardDescription>
             </CardHeader>
             <CardContent>
-              <button
-                onClick={() => window.location.reload()}
-                className="w-full bg-gray-800 hover:bg-gray-700 text-white py-2 px-4 rounded-lg font-medium transition-colors"
-              >
-                Retry Connection
-              </button>
+              <div className="text-xs text-gray-500">Check the relay domain, routes, and CORS.</div>
             </CardContent>
           </Card>
         ) : (
@@ -119,17 +116,13 @@ export default function Dashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-gray-900 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-gray-900 rounded-xl">
                   <span className="text-sm text-gray-400">Version</span>
-                  <Badge variant="outline" className="font-mono">
+                  <Badge variant="outline" className="font-mono border-white/10 bg-black/40">
                     {state?.worldVersion || "N/A"}
                   </Badge>
                 </div>
-                <SignalBar 
-                  label="Global Signal" 
-                  value={state?.globalSignal || 0}
-                  color="cyan"
-                />
+                <SignalBar label="Global Signal" value={state?.globalSignal || 0} color="cyan" />
               </CardContent>
             </Card>
 
@@ -146,22 +139,24 @@ export default function Dashboard() {
                   {factions.map((faction) => (
                     <div key={faction.id} className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: faction.color }}
-                        />
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: faction.color }} />
                         <span className="font-medium text-sm">{faction.name}</span>
                       </div>
-                      <SignalBar 
+                      <SignalBar
                         label={`${faction.name} Influence`}
                         value={faction.influence}
                         color={
-                          faction.color === "#ff0044" ? "red" :
-                          faction.color === "#00ffff" ? "cyan" :
-                          faction.color === "#00ff00" ? "green" :
-                          faction.color === "#ffff00" ? "yellow" :
-                          faction.color === "#8b5cf6" ? "purple" :
-                          "blue"
+                          faction.color === "#ff0044"
+                            ? "red"
+                            : faction.color === "#00ffff"
+                              ? "cyan"
+                              : faction.color === "#00ff00"
+                                ? "green"
+                                : faction.color === "#ffff00"
+                                  ? "yellow"
+                                  : faction.color === "#8b5cf6"
+                                    ? "purple"
+                                    : "blue"
                         }
                       />
                     </div>
@@ -186,7 +181,7 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
                     {connected ? (
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                     ) : (
                       <AlertCircle className="h-4 w-4 text-red-500" />
                     )}
@@ -194,9 +189,7 @@ export default function Dashboard() {
                       {connected ? "Live connection established" : "Connection lost"}
                     </span>
                   </div>
-                  <span className="font-mono text-xs text-gray-600">
-                    {connected ? "SSE" : "Polling"}
-                  </span>
+                  <span className="font-mono text-xs text-gray-600">{connected ? "SSE" : "Polling"}</span>
                 </div>
               </CardContent>
             </Card>

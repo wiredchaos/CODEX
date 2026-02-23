@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { RedLedgerState, RedLedgerEvents, Faction } from '@/types/redledger';
 import { fetchJson } from '@/lib/fetchJson';
+import { getAppId, isRelayConfigured, relayUrl } from '@/core/relay';
 
 interface RedLedgerData {
   state: RedLedgerState | null;
@@ -11,12 +12,7 @@ interface RedLedgerData {
   connected: boolean;
 }
 
-interface Config {
-  relayBaseUrl: string;
-  appId: string;
-}
-
-export function useRedLedgerData(config: Config | null) {
+export function useRedLedgerData() {
   const [data, setData] = useState<RedLedgerData>({
     state: null,
     events: null,
@@ -25,22 +21,30 @@ export function useRedLedgerData(config: Config | null) {
     error: null,
     connected: false,
   });
-  
+
   const sseRef = useRef<EventSource | null>(null);
   const pollIntervalRef = useRef<number | null>(null);
   const isSSEAvailable = useRef<boolean>(false);
 
   const fetchData = useCallback(async () => {
-    if (!config) return;
+    if (!isRelayConfigured()) {
+      setData((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: 'RELAY NOT CONFIGURED – BUILD ENV INVALID',
+        connected: false,
+      }));
+      return;
+    }
 
     try {
-      const { relayBaseUrl, appId } = config;
-      const baseUrl = relayBaseUrl.replace(/\/$/, '');
+      const appId = getAppId();
+      const q = `?appId=${encodeURIComponent(appId)}`;
 
       const [state, events, factions] = await Promise.all([
-        fetchJson<RedLedgerState>(`${baseUrl}/api/redledger/state?appId=${encodeURIComponent(appId)}`),
-        fetchJson<RedLedgerEvents>(`${baseUrl}/api/redledger/events?appId=${encodeURIComponent(appId)}`),
-        fetchJson<Faction[]>(`${baseUrl}/api/redledger/factions?appId=${encodeURIComponent(appId)}`),
+        fetchJson<RedLedgerState>(relayUrl(`/api/redledger/state${q}`)),
+        fetchJson<RedLedgerEvents>(relayUrl(`/api/redledger/events${q}`)),
+        fetchJson<Faction[]>(relayUrl(`/api/redledger/factions${q}`)),
       ]);
 
       setData((prev) => ({
@@ -61,14 +65,34 @@ export function useRedLedgerData(config: Config | null) {
         connected: false,
       }));
     }
-  }, [config]);
+  }, []);
+
+  const startPolling = useCallback(() => {
+    if (pollIntervalRef.current) return;
+
+    fetchData();
+    pollIntervalRef.current = window.setInterval(fetchData, 4000);
+  }, [fetchData]);
+
+  const stopPolling = useCallback(() => {
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+  }, []);
+
+  const cleanupSSE = useCallback(() => {
+    if (sseRef.current) {
+      sseRef.current.close();
+      sseRef.current = null;
+    }
+  }, []);
 
   const setupSSE = useCallback(() => {
-    if (!config || !isSSEAvailable.current) return;
+    if (!isRelayConfigured() || !isSSEAvailable.current) return;
 
-    const { relayBaseUrl, appId } = config;
-    const baseUrl = relayBaseUrl.replace(/\/$/, '');
-    const streamUrl = `${baseUrl}/api/redledger/stream?appId=${encodeURIComponent(appId)}`;
+    const appId = getAppId();
+    const streamUrl = relayUrl(`/api/redledger/stream?appId=${encodeURIComponent(appId)}`);
 
     sseRef.current = new EventSource(streamUrl);
 
@@ -99,52 +123,29 @@ export function useRedLedgerData(config: Config | null) {
       // Fallback to polling
       startPolling();
     };
-  }, [config]);
-
-  const startPolling = useCallback(() => {
-    if (pollIntervalRef.current) return;
-
-    fetchData();
-    pollIntervalRef.current = window.setInterval(fetchData, 4000);
-  }, [fetchData]);
-
-  const stopPolling = useCallback(() => {
-    if (pollIntervalRef.current) {
-      clearInterval(pollIntervalRef.current);
-      pollIntervalRef.current = null;
-    }
-  }, []);
-
-  const cleanupSSE = useCallback(() => {
-    if (sseRef.current) {
-      sseRef.current.close();
-      sseRef.current = null;
-    }
-  }, []);
+  }, [startPolling]);
 
   useEffect(() => {
-    if (!config) {
+    // Hard disable when not configured.
+    if (!isRelayConfigured()) {
       setData((prev) => ({
         ...prev,
         isLoading: false,
-        error: null,
+        error: 'RELAY NOT CONFIGURED – BUILD ENV INVALID',
         connected: false,
       }));
       return;
     }
 
-    // Try SSE first
     isSSEAvailable.current = true;
     setupSSE();
-
-    // Start polling immediately (will be stopped if SSE works)
     startPolling();
 
     return () => {
       cleanupSSE();
       stopPolling();
     };
-  }, [config, setupSSE, startPolling, stopPolling, cleanupSSE]);
+  }, [setupSSE, startPolling, stopPolling, cleanupSSE]);
 
   return data;
 }

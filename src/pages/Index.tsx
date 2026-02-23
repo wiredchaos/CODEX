@@ -3,6 +3,7 @@ import { OrbitControls, Grid, Float, Stars } from '@react-three/drei';
 import { useState, useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { useRedLedgerControl } from '@/hooks/useRedLedgerControl';
+import { RelayDiagnostics, RelayNotConfiguredBanner } from '@/components/RelayDiagnostics';
 
 interface LiquidityNodeProps {
   position: [number, number, number];
@@ -83,29 +84,15 @@ function Scene({ skyTint, volatility, spawnRateMultiplier, capturedNodes, onCapt
 
   return (
     <>
-      {/* Dynamic sky color from API */}
       <color attach="background" args={[skyTint]} />
-      
-      {/* Cyberpunk fog - matches sky tint */}
       <fog attach="fog" args={[skyTint, 5, 30]} />
-      
-      {/* Ambient lighting */}
+
       <ambientLight intensity={0.3} />
       <pointLight position={[10, 10, 10]} intensity={0.5} color="#00ffff" />
       <pointLight position={[-10, 5, -10]} intensity={0.3} color="#ff0044" />
-      
-      {/* Particle stars - intensity controlled by volatility */}
-      <Stars 
-        radius={100} 
-        depth={50} 
-        count={5000} 
-        factor={4} 
-        saturation={0} 
-        fade 
-        speed={1}
-      />
-      
-      {/* Neon infinite grid floor */}
+
+      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+
       <Grid
         args={[40, 40]}
         cellSize={1}
@@ -119,8 +106,7 @@ function Scene({ skyTint, volatility, spawnRateMultiplier, capturedNodes, onCapt
         followCamera={false}
         infiniteGrid
       />
-      
-      {/* Liquidity Nodes */}
+
       {nodes.map((node) => (
         <LiquidityNode
           key={node.id}
@@ -133,7 +119,6 @@ function Scene({ skyTint, volatility, spawnRateMultiplier, capturedNodes, onCapt
         />
       ))}
 
-      {/* Orbit controls for camera */}
       <OrbitControls
         enableZoom={true}
         enablePan={false}
@@ -148,17 +133,18 @@ function Scene({ skyTint, volatility, spawnRateMultiplier, capturedNodes, onCapt
 }
 
 const Index = () => {
+  // Always call the hook (Rules of Hooks). The hook itself hard-disables when relay env is missing.
   const { flags, captureNode, isLoading, error } = useRedLedgerControl();
+
   const [capturedNodes, setCapturedNodes] = useState<Set<string>>(new Set());
   const [isInitialized, setIsInitialized] = useState(false);
-  
-  // Wait for initial load
+
   useEffect(() => {
     if (!isLoading) {
       setIsInitialized(true);
     }
   }, [isLoading]);
-  
+
   const nodes = [
     { position: [-4, 2, 0] as [number, number, number], id: 'node-0' },
     { position: [-2, 1.5, 3] as [number, number, number], id: 'node-1' },
@@ -177,8 +163,7 @@ const Index = () => {
   };
 
   const signalPercent = Math.round((capturedNodes.size / nodes.length) * 100);
-  
-  // Ensure flags always has default values
+
   const safeFlags = {
     skyTint: flags?.skyTint || '#0a0a0f',
     volatility: flags?.volatility ?? 1,
@@ -187,14 +172,9 @@ const Index = () => {
 
   return (
     <div className="w-full h-screen bg-black overflow-hidden relative">
-      {/* Canvas container */}
       {isInitialized && (
-        <Canvas
-          camera={{ position: [0, 5, 10], fov: 75 }}
-          dpr={[1, 2]}
-          performance={{ min: 0.5 }}
-        >
-          <Scene 
+        <Canvas camera={{ position: [0, 5, 10], fov: 75 }} dpr={[1, 2]} performance={{ min: 0.5 }}>
+          <Scene
             skyTint={safeFlags.skyTint}
             volatility={safeFlags.volatility}
             spawnRateMultiplier={safeFlags.spawnRateMultiplier}
@@ -204,47 +184,31 @@ const Index = () => {
         </Canvas>
       )}
 
-      {/* HUD Overlay */}
-      <div className="absolute top-4 left-4 pointer-events-none">
+      <div className="absolute top-4 left-4 right-4 flex items-start justify-between gap-3 pointer-events-none">
+        <div className="pointer-events-none max-w-[520px]">
+          <RelayNotConfiguredBanner className="shadow-[0_0_0_1px_rgba(0,0,0,0.4)]" />
+        </div>
+        <div className="flex-1" />
+        <div className="pointer-events-none text-right space-y-2">
+          <RelayDiagnostics />
+          {error && <div className="text-xs text-red-300">API ERROR: {error}</div>}
+          {isLoading && <div className="text-xs text-amber-200">SYNCING...</div>}
+        </div>
+      </div>
+
+      <div className="absolute top-20 left-4 pointer-events-none">
         <div className="bg-black/80 border border-cyan-500/50 p-4 rounded-lg backdrop-blur-sm space-y-2">
           <div className="font-mono text-2xl text-cyan-400 font-bold">
             SIGNAL: {signalPercent}%
           </div>
-          <div className="text-xs text-gray-400">
-            NODES CAPTURED: {capturedNodes.size}/{nodes.length}
-          </div>
-          <div className="text-xs text-gray-400">
-            VOLATILITY: {safeFlags.volatility.toFixed(2)}
-          </div>
-          <div className="text-xs text-gray-400">
-            SPAWN RATE: {safeFlags.spawnRateMultiplier.toFixed(2)}x
-          </div>
+          <div className="text-xs text-gray-400">NODES CAPTURED: {capturedNodes.size}/{nodes.length}</div>
+          <div className="text-xs text-gray-400">VOLATILITY: {safeFlags.volatility.toFixed(2)}</div>
+          <div className="text-xs text-gray-400">SPAWN RATE: {safeFlags.spawnRateMultiplier.toFixed(2)}x</div>
         </div>
       </div>
 
-      {/* Connection status */}
-      <div className="absolute top-4 right-4 pointer-events-none text-right space-y-1">
-        <h1 className="text-2xl font-bold text-red-500 tracking-widest">
-          RED LEDGER
-        </h1>
-        <p className="text-sm text-cyan-400">FIELD ENGINE v1.0</p>
-        {error && (
-          <div className="text-xs text-red-500 mt-2">
-            API ERROR: {error}
-          </div>
-        )}
-        {isLoading && (
-          <div className="text-xs text-yellow-400">
-            SYNCING...
-          </div>
-        )}
-      </div>
-
-      {/* Instructions */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none">
-        <p className="text-gray-400 text-sm font-mono">
-          CLICK NODES TO CAPTURE • DRAG TO ROTATE
-        </p>
+        <p className="text-gray-400 text-sm font-mono">CLICK NODES TO CAPTURE • DRAG TO ROTATE</p>
       </div>
     </div>
   );
