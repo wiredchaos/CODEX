@@ -25,6 +25,7 @@ PRs missing skill proof may be closed without review.
 - `README.md`: Brief label for the repository and quick pointers.
 - `DIAGNOSTIC.md`: Current snapshot of repository layout, status, and recommended next steps.
 - `docs/AGENTIC_UI_INGESTION_PIPELINE.md`: Agentic UI ingestion pipeline and Transmission Frame compiler spec.
+- `docs/COPAW_CONTRIBUTION_PLAYBOOK.md`: Step-by-step guide for contributing WIRED CHAOS-aligned updates to the CoPaw OSS repository.
 
 ## Canonical architecture (WIRED CHAOS META)
 The canonical architecture baseline is formalized in `/doc` and serves as the non-runtime authority for policy boundaries, trust handling, ingress constraints, and execution contracts.
