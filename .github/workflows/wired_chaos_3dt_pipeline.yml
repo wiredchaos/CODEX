@@ -93,8 +93,10 @@ jobs:
 
       - name: Capture job version
         id: summary
+        env:
+          INTAKE_ID: ${{ inputs.intake_id }}
         run: |
-          VERSION=$(jq -r ".jobs[\"${{ inputs.intake_id }}\"].last_version" WIRED_CHAOS_3DT/_JOBS_MANIFEST.json)
+          VERSION=$(jq -r ".jobs[\"$INTAKE_ID\"].last_version" WIRED_CHAOS_3DT/_JOBS_MANIFEST.json)
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Detect changes
@@ -125,7 +127,6 @@ jobs:
         env:
           INTAKE_ID: ${{ inputs.intake_id }}
           CONSUMER: ${{ inputs.consumer }}
+          VERSION: ${{ steps.summary.outputs.version }}
         run: |
-          echo "Registered $INTAKE_ID for $CONSUMER at version ${{ steps.summary.outputs.version }} (placeholders only)."
-        run: |
-          echo "Registered ${{ inputs.intake_id }} for ${{ inputs.consumer }} at version ${{ steps.summary.outputs.version }} (placeholders only)."
+          echo "Registered $INTAKE_ID for $CONSUMER at version $VERSION (placeholders only)."
