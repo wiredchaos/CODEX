@@ -185,40 +185,6 @@ export function subscribeToTelemetry(handler: (event: TelemetryEvent) => void): 
   const listener = (event: Event) => {
     const telemetryEvent = (event as CustomEvent<TelemetryEvent>).detail
     handler(telemetryEvent)
-export function emitTelemetry(type: TelemetryEventType, options?: TelemetryEventOptions): TelemetryEvent
-export function emitTelemetry(event: TelemetryEventInput): TelemetryEvent
-export function emitTelemetry(
-  arg1: TelemetryEventType | TelemetryEventInput,
-  arg2: TelemetryEventOptions = {},
-): TelemetryEvent {
-  const now = Date.now()
-
-  const event: TelemetryEvent =
-    typeof arg1 === "string"
-      ? {
-          id: generateEventId(),
-          type: arg1,
-          timestamp: now,
-          ...arg2,
-        }
-      : {
-          ...(arg1 as Record<string, unknown>),
-          id: typeof arg1.id === "string" ? arg1.id : generateEventId(),
-          type: String(arg1.type) as TelemetryEventType,
-          timestamp: typeof arg1.timestamp === "number" ? arg1.timestamp : now,
-        }
-
-  // Queue asynchronously so telemetry cannot block UI or render loops.
-  pendingQueue.push(event)
-  scheduleFlush()
-
-  // Log to console in development (async-safe)
-  if (process.env.NODE_ENV === "development") {
-    try {
-      console.log(`[TELEMETRY] ${String(event.type)}`, event)
-    } catch {
-      // ignore
-    }
   }
 
   telemetryEmitter.addEventListener("telemetry", listener)
