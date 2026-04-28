@@ -1,0 +1,390 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  ANALYST
+  READONLY
+}
+
+enum AlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AlertStatus {
+  open
+  investigating
+  mitigated
+  accepted_risk
+  false_positive
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users                User[]
+  apiKeys              ApiKey[]
+  auditLogs            AuditLog[]
+  github               GitHubEnterpriseInstance[]
+  repos                Repository[]
+  scans                RepositoryScan[]
+  secretFindings       SecretFinding[]
+  bundleFindings       BundleFinding[]
+  featureFlagFindings  FeatureFlagFinding[]
+  webhookRiskFindings  WebhookRiskFinding[]
+  webhooks             WebhookEndpoint[]
+  vendors              Vendor[]
+  vendorAssessments    VendorAssessment[]
+  disclosureCases      DisclosureCase[]
+  evidence             EvidenceItem[]
+  chainOfCustodyEvents ChainOfCustodyEvent[]
+  alerts               Alert[]
+  riskScores           RiskScore[]
+  reports              ExecutiveReport[]
+
+  @@unique([name])
+}
+
+model User {
+  id             String   @id @default(cuid())
+  organizationId String
+  email          String
+  name           String?
+  role           Role     @default(READONLY)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  auditLogs    AuditLog[]
+
+  @@unique([organizationId, email])
+  @@index([organizationId])
+}
+
+model ApiKey {
+  id             String    @id @default(cuid())
+  organizationId String
+  // Store only a fingerprint/hash of the key, never the raw API key.
+  keyHash        String    @unique
+  label          String?
+  role           Role      @default(ADMIN)
+  active         Boolean   @default(true)
+  lastUsedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  auditLogs    AuditLog[]
+
+  @@index([organizationId])
+}
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  actorApiKeyId  String?
+  actorUserId    String?
+  requestId      String
+  action         String
+  targetType     String?
+  targetId       String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actorApiKey  ApiKey?      @relation(fields: [actorApiKeyId], references: [id], onDelete: SetNull)
+  actorUser    User?        @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([requestId])
+}
+
+model GitHubEnterpriseInstance {
+  id             String    @id @default(cuid())
+  organizationId String
+  baseUrl        String
+  // Do NOT store tokens. Store only config / version evidence.
+  lastVersion    String?
+  lastCheckedAt  DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, baseUrl])
+  @@index([organizationId])
+}
+
+model Repository {
+  id             String   @id @default(cuid())
+  organizationId String
+  provider       String   @default("github")
+  externalId     String
+  name           String
+  fullName       String
+  private        Boolean
+  defaultBranch  String?
+  archived       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  scans        RepositoryScan[]
+
+  @@unique([organizationId, provider, externalId])
+  @@index([organizationId])
+}
+
+model RepositoryScan {
+  id             String    @id @default(cuid())
+  organizationId String
+  repositoryId   String
+  kind           String
+  status         String    @default("queued")
+  startedAt      DateTime?
+  completedAt    DateTime?
+  summary        Json?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  repository   Repository   @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  secretFindings      SecretFinding[]
+  bundleFindings      BundleFinding[]
+  featureFlagFindings FeatureFlagFinding[]
+  webhookFindings     WebhookRiskFinding[]
+
+  @@index([organizationId, createdAt])
+  @@index([repositoryId])
+}
+
+model SecretFinding {
+  id              String        @id @default(cuid())
+  organizationId  String
+  scanId          String
+  // fingerprinted; never store raw secret
+  fingerprint     String
+  detector        String
+  location        String
+  previewRedacted String
+  severity        AlertSeverity
+  evidenceHash    String
+  createdAt       DateTime      @default(now())
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  scan         RepositoryScan @relation(fields: [scanId], references: [id], onDelete: Cascade)
+
+  @@unique([scanId, fingerprint, location])
+  @@index([organizationId, createdAt])
+}
+
+model BundleFinding {
+  id              String        @id @default(cuid())
+  organizationId  String
+  scanId          String
+  kind            String
+  location        String
+  previewRedacted String
+  severity        AlertSeverity
+  evidenceHash    String
+  createdAt       DateTime      @default(now())
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  scan         RepositoryScan @relation(fields: [scanId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+}
+
+model FeatureFlagFinding {
+  id              String        @id @default(cuid())
+  organizationId  String
+  scanId          String
+  provider        String
+  flagKey         String
+  previewRedacted String
+  reasons         Json
+  severity        AlertSeverity
+  evidenceHash    String
+  createdAt       DateTime      @default(now())
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  scan         RepositoryScan @relation(fields: [scanId], references: [id], onDelete: Cascade)
+
+  @@unique([scanId, provider, flagKey])
+  @@index([organizationId, createdAt])
+}
+
+model WebhookEndpoint {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  url            String
+  allowlist      Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  findings     WebhookRiskFinding[]
+
+  @@index([organizationId])
+}
+
+model WebhookRiskFinding {
+  id             String        @id @default(cuid())
+  organizationId String
+  scanId         String?
+  webhookId      String?
+  url            String
+  riskScore      Int
+  reasons        Json
+  severity       AlertSeverity
+  evidenceHash   String
+  createdAt      DateTime      @default(now())
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  scan         RepositoryScan?  @relation(fields: [scanId], references: [id], onDelete: SetNull)
+  webhook      WebhookEndpoint? @relation(fields: [webhookId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+}
+
+model Vendor {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  website        String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assessments  VendorAssessment[]
+  disclosure   DisclosureCase[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+}
+
+model VendorAssessment {
+  id             String   @id @default(cuid())
+  organizationId String
+  vendorId       String
+  certifications Json?
+  riskNotes      String?
+  score          Int?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  vendor       Vendor       @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+}
+
+model DisclosureCase {
+  id             String    @id @default(cuid())
+  organizationId String
+  vendorId       String
+  title          String
+  openedAt       DateTime  @default(now())
+  dueAt          DateTime?
+  status         String    @default("open")
+  lastContactAt  DateTime?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  vendor       Vendor       @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+}
+
+model EvidenceItem {
+  id             String   @id @default(cuid())
+  organizationId String
+  kind           String
+  // store references/URIs only, not raw payloads
+  referenceUri   String?
+  sha256         String
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  chain        ChainOfCustodyEvent[]
+
+  @@unique([organizationId, sha256])
+  @@index([organizationId, createdAt])
+}
+
+model ChainOfCustodyEvent {
+  id             String   @id @default(cuid())
+  organizationId String
+  evidenceId     String
+  requestId      String
+  action         String
+  actor          String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  evidence     EvidenceItem @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+  @@index([evidenceId, createdAt])
+}
+
+model Alert {
+  id             String        @id @default(cuid())
+  organizationId String
+  severity       AlertSeverity
+  status         AlertStatus   @default(open)
+  title          String
+  summary        String?
+  dedupeKey      String
+  evidence       Json
+  remediation    Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, dedupeKey])
+  @@index([organizationId, createdAt])
+}
+
+model RiskScore {
+  id             String   @id @default(cuid())
+  organizationId String
+  scope          String
+  scopeId        String?
+  score          Int
+  factors        Json
+  computedAt     DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, computedAt])
+}
+
+model ExecutiveReport {
+  id             String   @id @default(cuid())
+  organizationId String
+  periodStart    DateTime
+  periodEnd      DateTime
+  report         Json
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+}
