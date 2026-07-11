@@ -65,6 +65,7 @@ The canonical architecture baseline is formalized in `/doc` and serves as the no
 - `doc/BRAND_ORIENTATION_LAYER_SPEC.md`: Experience posture mapping without policy mutation.
 - `doc/INGRESS_MEMBRANE_SPEC.md`: Boundary normalization and reject-first ingress contract.
 - `doc/EXECUTION_FABRIC_SPEC.md`: Authorized side-effect execution and receipt guarantees.
+- `docs/OBSCURA_BROWSER_EXECUTION_ADAPTER.md`: Approved pilot documentation for Obscura-first routing on governed low-risk public-web workloads, with Playwright + Chromium fallback, stealth disabled by default, SSRF/private-network blocking, human approval for consequential actions, and production promotion gated by benchmark, security, licensing, and compatibility reviews.
 
 These artifacts are specification-only and do not introduce runtime behavior.
 
