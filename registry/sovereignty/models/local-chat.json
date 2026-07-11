@@ -1,0 +1,1 @@
+{"id":"local-chat","status":"development_only","providerId":"local-dev","rightsId":"dev-open","hardwareId":"local-cpu","capabilities":["chat"],"operations":["inference"],"costUsd":"unknown","latencyMs":"unknown","notes":"mock development_only model; cost and latency unknown/not_verified"}

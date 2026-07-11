@@ -1,0 +1,7 @@
+{
+  "title": "Sovereignty model registry schema",
+  "type": "object",
+  "additionalProperties": false,
+  "description": "Strict schema placeholder enforced by src/sovereignty/registry.ts in CI.",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -130,3 +130,10 @@ CODEX operates as the truth layer holding manifests, contracts, and state. WIRED
 - The repo includes a checked-in `.npmrc` with the same registry pin to keep installs consistent across environments.
 - If you need to consume scoped packages hosted on GitHub Packages, authenticate with your scope before installing: `npm login --scope=@yourScope --registry=https://npm.pkg.github.com`.
 - For Three.js playground reference work, clone the upstream sandbox locally: `git clone https://github.com/pinkforest/threejs-playground.git`.
+
+## AI Sovereignty Control Plane
+An experimental provider-neutral control plane is available under `src/sovereignty`.
+
+Canonical sovereignty doctrine and program ownership remain in `wiredchaos/AGENTROPOLIS-SOVEREIGNTY`.
+
+This CODEX implementation is a reference and incubation lane until it is packaged, extracted, or formally adopted by the canonical repository. Detailed usage and security notes live in `docs/AI_SOVEREIGNTY_CONTROL_PLANE.md` and `src/sovereignty/README.md`.

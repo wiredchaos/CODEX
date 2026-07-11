@@ -1,0 +1,1 @@
+{"id":"local-dev","status":"development_only","type":"local","approvedForRestricted":true,"jurisdictionId":"us-dev","health":"healthy","endpointUrl":"http://127.0.0.1:11434","notes":"mock development_only local adapter; not_verified"}

@@ -1,0 +1,1 @@
+{"id":"cloud-mock","status":"mock","type":"cloud","approvedForRestricted":false,"jurisdictionId":"us-dev","health":"healthy","endpointUrl":"https://example.invalid/provider","notes":"mock development_only cloud adapter; not_verified"}

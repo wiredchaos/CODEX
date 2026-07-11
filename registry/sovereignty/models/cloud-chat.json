@@ -1,0 +1,1 @@
+{"id":"cloud-chat","status":"mock","providerId":"cloud-mock","rightsId":"dev-open","capabilities":["chat"],"operations":["inference"],"costUsd":0.02,"latencyMs":500,"notes":"mock development_only cloud model; not_verified"}
