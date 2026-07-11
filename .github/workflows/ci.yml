@@ -16,3 +16,7 @@ jobs:
       - run: pnpm install
       - run: pnpm turbo run build
       - run: pnpm turbo run test
+      - run: pnpm sovereignty:typecheck
+      - run: pnpm sovereignty:test
+      - run: pnpm sovereignty:validate-registries
+      - run: pnpm dlx gitleaks detect --no-git --redact --source . || true

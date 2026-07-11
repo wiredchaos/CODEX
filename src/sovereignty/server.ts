@@ -1,0 +1,11 @@
+import express from 'express';
+import helmet from 'helmet';
+import { GatewayRequestSchema, StressRequestSchema } from './schemas';
+import { Registry } from './registry';
+import { CircuitBreakerStore } from './circuitBreaker';
+import { defaultAdapters } from './providers';
+import { ModelGateway } from './gateway';
+import { TelemetryStore } from './telemetry';
+import { runEvaluations } from './evaluation';
+import { runStressScenario, scenarios } from './stress';
+export function createSovereigntyApp() { const app = express(); app.use(helmet()); app.use(express.json({ limit: '256kb' })); const registry = new Registry(); const circuits = new CircuitBreakerStore(); const telemetry = new TelemetryStore(); const gateway = new ModelGateway(defaultAdapters(), registry, circuits, telemetry); app.post('/v1/gateway/execute', async (req, res) => { const parsed = GatewayRequestSchema.safeParse(req.body); if (!parsed.success) return res.status(400).json({ error: 'INVALID_REQUEST', details: parsed.error.issues }); try { res.json(await gateway.execute(parsed.data, String(req.header('x-agentropolis-caller') ?? 'api'))); } catch (e) { res.status(422).json({ error: 'ROUTE_REJECTED', message: (e as Error).message, routeTrace: (e as any).routeTrace ?? [] }); } }); app.get('/v1/providers', (_req, res) => res.json(registry.providers)); app.get('/v1/models', (_req, res) => res.json(registry.models)); app.get('/v1/hardware', (_req, res) => res.json(registry.hardware)); app.get('/v1/rights', (_req, res) => res.json(registry.rights)); app.get('/v1/circuit-breakers', (_req, res) => res.json(circuits.state)); app.post('/v1/circuit-breakers/:id/reset', (req, res) => { circuits.reset(req.params.id); res.json(circuits.get(req.params.id)); }); app.get('/v1/telemetry/summary', (_req, res) => res.json(telemetry.summary())); app.post('/v1/evaluations/run', async (_req, res) => res.json(await runEvaluations(gateway))); app.post('/v1/stress-tests/run', async (req, res) => { const parsed = StressRequestSchema.safeParse(req.body); if (!parsed.success || !scenarios.includes(parsed.data.scenario)) return res.status(400).json({ error: 'INVALID_SCENARIO', scenarios }); res.json(await runStressScenario(parsed.data.scenario, gateway, circuits)); }); app.get('/v1/health', (_req, res) => res.json({ ok: true, service: 'agentropolis-sovereignty-control-plane' })); return app; }

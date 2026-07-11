@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "noEmit": true, "isolatedModules": false, "types": ["node", "jest"] },
+  "include": ["src/sovereignty/**/*.ts", "scripts/validate-sovereignty-registries.ts", "tests/sovereignty/**/*.ts"]
+}

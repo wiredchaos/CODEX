@@ -1,0 +1,14 @@
+modes: [NORMAL, DEGRADED, OFFLINE, LOCKDOWN]
+default_mode: DEGRADED
+capabilities:
+  - local_registry_search
+  - local_canon_access
+  - emergency_routing
+  - template_drafting
+  - deterministic_tools
+  - audit_log_access
+  - data_export
+  - degraded_offline_operation
+routing:
+  allow_cloud: false
+  preferred_provider: deterministic-fallback

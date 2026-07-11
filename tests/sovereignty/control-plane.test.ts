@@ -1,0 +1,17 @@
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { ModelGateway } from '../../src/sovereignty/gateway';
+import { defaultAdapters } from '../../src/sovereignty/providers';
+import { Registry } from '../../src/sovereignty/registry';
+import { CircuitBreakerStore } from '../../src/sovereignty/circuitBreaker';
+import { TelemetryStore, AuditLog } from '../../src/sovereignty/telemetry';
+import { runStressScenario } from '../../src/sovereignty/stress';
+import { createSovereigntyApp } from '../../src/sovereignty/server';
+const mk = () => { const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sovereignty-')); const circuits = new CircuitBreakerStore(path.join(dir, 'circuits.json')); const telemetry = new TelemetryStore(path.join(dir, 'telemetry.jsonl')); const audit = new AuditLog(path.join(dir, 'audit.jsonl')); return { dir, circuits, telemetry, audit, gateway: new ModelGateway(defaultAdapters(), new Registry(), circuits, telemetry, audit) }; };
+test('routes restricted data away from cloud and creates audit/telemetry', async () => { const h = mk(); const r = await h.gateway.execute({ operation: 'reason', input: 'secret', dataClassification: 'restricted' }); expect(r.provider).not.toBe('mock-cloud'); expect(fs.existsSync(path.join(h.dir, 'audit.jsonl'))).toBe(true); expect(h.telemetry.summary().averageLatencyMs).toBeGreaterThanOrEqual(0); });
+test('enforces cost ceilings with deterministic fallback', async () => { const h = mk(); const r = await h.gateway.execute({ operation: 'generate', input: 'cheap', maxCostUsd: 0, dataClassification: 'public' }); expect(r.provider).toBe('deterministic-fallback'); });
+test('blocks jurisdiction by rights registry', async () => { const h = mk(); await expect(h.gateway.execute({ operation: 'transcribe', input: 'audio', jurisdiction: 'CN', dataClassification: 'public' })).rejects.toThrow('No eligible provider route'); });
+test('circuit breaker opens after failures and can reset', () => { const h = mk(); h.circuits.recordFailure('mock-cloud', 'x'); h.circuits.recordFailure('mock-cloud', 'x'); h.circuits.recordFailure('mock-cloud', 'x'); expect(h.circuits.get('mock-cloud').state).toBe('OPEN'); h.circuits.reset('mock-cloud'); expect(h.circuits.get('mock-cloud').state).toBe('CLOSED'); });
+test('stress harness supports no-model mode', async () => { const h = mk(); const result = await runStressScenario('force-no-model-mode', h.gateway, h.circuits); expect(result.passed).toBe(true); expect(result.selectedFallback).toBe('deterministic-fallback'); });
+test('api exposes gateway and registry endpoints', async () => { const app = createSovereigntyApp(); const server = app.listen(0); const address = server.address(); if (!address || typeof address === 'string') throw new Error('missing address'); const base = `http://127.0.0.1:${address.port}`; try { const health = await fetch(`${base}/v1/health`); expect(health.status).toBe(200); const res = await fetch(`${base}/v1/gateway/execute`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ operation: 'moderate', input: 'hello', maxCostUsd: 0 }) }); const body = await res.json() as { provider: string }; expect(res.status).toBe(200); expect(body.provider).toBe('deterministic-fallback'); } finally { server.close(); } });

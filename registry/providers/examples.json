@@ -1,0 +1,5 @@
+[
+{"id":"mock-cloud","name":"Mock Cloud Provider","deploymentMode":"cloud","jurisdictions":["US","EU"],"approvedFor":["public","internal"],"retention":"mock_no_retention_contract_not_verified","status":"active"},
+{"id":"mock-local","name":"Mock Local Provider","deploymentMode":"local","jurisdictions":["global"],"approvedFor":["public","internal","confidential","restricted"],"retention":"local_only","status":"active"},
+{"id":"deterministic-fallback","name":"Deterministic Fallback Provider","deploymentMode":"deterministic","jurisdictions":["global"],"approvedFor":["public","internal","confidential","restricted"],"retention":"local_only","status":"active"}
+]
