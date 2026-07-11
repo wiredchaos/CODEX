@@ -1,0 +1,69 @@
+{
+  "schema_version": "0.1.0",
+  "request_id": "req-fake-0001",
+  "workflow_id": "wf-fake-54t",
+  "timestamp": "2026-01-01T00:00:00Z",
+  "environment": "development",
+  "jurisdiction": "test-only",
+  "data_classification": "internal",
+  "actor_id": "human-fake-operator",
+  "actor_type": "human",
+  "agent_id": "agent-54t-docs",
+  "agent_version": "0.1.0",
+  "tool_id": null,
+  "tool_version": null,
+  "policy_id": "54t-core",
+  "policy_version": "0.1.0",
+  "policy_gate": "default-deny",
+  "output_hash": null,
+  "previous_receipt_hash": null,
+  "signing": {
+    "algorithm": "planned",
+    "key_id": "planned",
+    "signature": null
+  },
+  "metadata": {
+    "synthetic": true
+  },
+  "notes": "Synthetic validation fixture; no raw sensitive content.",
+  "action": "settle test wallet transfer",
+  "action_class": "wallet",
+  "risk_level": "critical",
+  "autonomy_tier": "A3",
+  "decision": "allow",
+  "decision_reason": "Two independent synthetic approvals matched the normalized payload hash.",
+  "approval_status": "approved",
+  "approval_evidence": [
+    {
+      "approver_id": "human-fake-approver-a",
+      "approver_type": "human",
+      "timestamp": "2026-01-01T00:01:00Z",
+      "expires_at": "2026-01-01T00:06:00Z",
+      "normalized_payload_hash": "sha256:3e3bb2c03b6f3770bd5f8cc02241e03ca86f2f98fd911a0f0748dde237b50a53",
+      "evidence_ref": "evidence://fake/approval-a",
+      "signature": null
+    },
+    {
+      "approver_id": "human-fake-approver-b",
+      "approver_type": "human",
+      "timestamp": "2026-01-01T00:02:00Z",
+      "expires_at": "2026-01-01T00:06:00Z",
+      "normalized_payload_hash": "sha256:3e3bb2c03b6f3770bd5f8cc02241e03ca86f2f98fd911a0f0748dde237b50a53",
+      "evidence_ref": "evidence://fake/approval-b",
+      "signature": null
+    }
+  ],
+  "wallet_details": {
+    "initiator_id": "human-fake-initiator",
+    "chain": "fake-test-chain",
+    "asset": "TST",
+    "amount": "12.34",
+    "destination": "fake-destination-000000",
+    "normalized_transaction_hash": "sha256:3e3bb2c03b6f3770bd5f8cc02241e03ca86f2f98fd911a0f0748dde237b50a53",
+    "replay_nonce": "wallet-nonce-0001"
+  },
+  "input_hash": "sha256:3e3bb2c03b6f3770bd5f8cc02241e03ca86f2f98fd911a0f0748dde237b50a53",
+  "expires_at": "2026-01-01T00:06:00Z",
+  "receipt_id": "rcpt-wallet-dual-consent-approved",
+  "nonce": "nonce-wallet-dual-consent-"
+}

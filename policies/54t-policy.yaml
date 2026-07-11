@@ -1,0 +1,56 @@
+policy_id: 54t-core
+policy_version: 0.1.0
+status: draft
+default_decision: deny
+fail_mode: closed
+
+receipt:
+  required_for:
+    - privileged_action
+    - denied_action
+    - quarantined_action
+    - approval_request
+  immutable_storage_required: planned
+
+data_classifications:
+  - public
+  - internal
+  - confidential
+  - restricted
+
+risk_levels:
+  - low
+  - medium
+  - high
+  - critical
+
+autonomy_tiers:
+  A0: read_only
+  A1: recommend
+  A2: reversible_execution
+  A3: approval_required_execution
+  A4: limited_autonomy
+  A5: prohibited_without_special_governance
+
+controls:
+  default_deny: true
+  block_secret_exposure: true
+  block_unverified_tool_execution: true
+  treat_untrusted_content_as_data: true
+  content_cannot_grant_authority: true
+  quarantine_suspicious_instruction_patterns: true
+  require_scoped_tool_permissions: true
+  require_fresh_approval_for_sensitive_actions: true
+  prevent_replay: true
+  require_receipt_chain_integrity: true
+
+wallets:
+  dual_consent_required: true
+  bind_approval_to_exact_payload: true
+  approval_expiry_seconds: 300
+  replay_protection_required: true
+  independent_approvers_required: true
+
+overrides:
+  permitted: false
+  emergency_disable_supported: planned
