@@ -130,3 +130,32 @@ CODEX operates as the truth layer holding manifests, contracts, and state. WIRED
 - The repo includes a checked-in `.npmrc` with the same registry pin to keep installs consistent across environments.
 - If you need to consume scoped packages hosted on GitHub Packages, authenticate with your scope before installing: `npm login --scope=@yourScope --registry=https://npm.pkg.github.com`.
 - For Three.js playground reference work, clone the upstream sandbox locally: `git clone https://github.com/pinkforest/threejs-playground.git`.
+
+## AGENTROPOLIS-54T governance baseline
+
+AGENTROPOLIS-54T is the defense, governance, policy-contract, verification, and receipt layer for AGENTROPOLIS-aligned systems. This repository section is doctrine and validation baseline only; it does not claim a live runtime policy engine, cryptographic signing service, immutable receipt store, wallet executor, or identity verifier.
+
+Federation roles are evidence-scoped:
+
+- `wiredchaos/agentropolis` is treated as the canonical Root City OS and source of city doctrine.
+- `wiredchaos/AGENTROPOLIS-54T` is the defense, governance, policy-contract, verification, and receipt layer.
+- `wiredchaos/AGENTROPOLIS-AGENT-MCP` is the governed MCP/tool integration kit.
+- HERMES-related repositories may provide runtime, dispatch, operator, or public application surfaces depending on each repository's own documentation.
+
+Core 54T artifacts:
+
+- [54T policy contract](policies/54t-policy.yaml)
+- [Receipt schema](schemas/receipt.schema.json)
+- [Policy gates](docs/POLICY-GATES.md)
+- [Dual consent doctrine](docs/DUAL-CONSENT.md)
+- [Prompt-injection doctrine](docs/PROMPT-INJECTION.md)
+- [Threat model](docs/THREAT-MODEL.md)
+- [Policy change governance](docs/POLICY-CHANGE-GOVERNANCE.md)
+- [Live vs planned status](docs/LIVE-VS-PLANNED.md)
+- [Manual tests](tests/README.md)
+
+Validate the baseline with:
+
+```bash
+python scripts/validate.py
+```

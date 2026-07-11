@@ -1,0 +1,22 @@
+name: Validate 54T Contracts
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install validation dependencies
+        run: python -m pip install --upgrade jsonschema PyYAML
+      - name: Validate YAML, JSON Schema, examples, links, and secret patterns
+        run: python scripts/validate.py
