@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentropolis.city/schemas/engineering-shift.schema.json",
+  "title": "AGENTROPOLIS Engineering Shift",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["shiftId", "taskId", "repository", "branch", "mandate", "executionOwner", "agent", "state", "budget", "permissions", "rollback", "receiptStatus"],
+  "properties": {
+    "shiftId": { "type": "string", "pattern": "^SHIFT-[0-9]{8}-[A-Z0-9-]+$" },
+    "taskId": { "type": "string", "pattern": "^TASK-[A-Z0-9-]+$" },
+    "repository": { "type": "string" },
+    "branch": { "type": "string", "minLength": 1 },
+    "mandate": { "type": "string", "minLength": 1 },
+    "executionOwner": { "type": "string", "minLength": 1 },
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runtime", "model"],
+      "properties": {
+        "runtime": { "type": "string" },
+        "model": { "type": "string" }
+      }
+    },
+    "state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["phase", "completed", "remaining"],
+      "properties": {
+        "phase": { "enum": ["route", "survey", "plan", "build", "run", "test", "review", "seal", "closed", "blocked"] },
+        "completed": { "type": "array", "items": { "type": "string" } },
+        "remaining": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "budget": { "$ref": "engineering-task.schema.json#/$defs/budget" },
+    "permissions": { "$ref": "engineering-task.schema.json#/$defs/permissions" },
+    "decisions": { "type": "array", "items": { "type": "string" } },
+    "filesChanged": { "type": "array", "items": { "type": "string" } },
+    "commandsRun": { "type": "array", "items": { "type": "string" } },
+    "reviews": { "type": "array", "items": { "type": "string" } },
+    "risks": { "type": "array", "items": { "type": "string" } },
+    "rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "checkpoint"],
+      "properties": {
+        "strategy": { "type": "string", "minLength": 1 },
+        "checkpoint": { "type": "string", "minLength": 1 }
+      }
+    },
+    "handoff": { "type": "object", "additionalProperties": false, "properties": { "nextAction": { "type": "string" } } },
+    "receiptStatus": { "enum": ["pending", "sealed", "failed"] }
+  },
+  "$defs": {
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maxTokens", "maxRuntimeMinutes", "maxReviewRounds"],
+      "properties": {
+        "maxTokens": { "type": "integer", "minimum": 1 },
+        "maxRuntimeMinutes": { "type": "integer", "minimum": 1 },
+        "maxReviewRounds": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["writePaths", "forbiddenPaths"],
+      "properties": {
+        "writePaths": { "type": "array", "items": { "type": "string" } },
+        "forbiddenPaths": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}
