@@ -156,35 +156,16 @@ function dispatchAsync(event: TelemetryEvent) {
   })
 }
 
-export function emitTelemetry(type: TelemetryEventType, options?: TelemetryOptions): TelemetryEvent
-export function emitTelemetry(payload: TelemetryPayload): TelemetryEvent
-export function emitTelemetry(
-  typeOrPayload: TelemetryEventType | TelemetryPayload,
-  options: TelemetryOptions = {},
-): TelemetryEvent {
-  const payload: TelemetryPayload =
-    typeof typeOrPayload === "string" ? { type: typeOrPayload, ...options } : typeOrPayload
-
-  const event: TelemetryEvent = {
-    id: generateEventId(),
-    type: payload.type,
-    timestamp: Date.now(),
-    patchId: payload.patchId,
-    realm: payload.realm,
-    userId: payload.userId,
-    metadata: payload.metadata,
-  }
-
-  writeEvent(event)
-  dispatchAsync(event)
-
-  return event
-}
-
 export function subscribeToTelemetry(handler: (event: TelemetryEvent) => void): () => void {
   const listener = (event: Event) => {
     const telemetryEvent = (event as CustomEvent<TelemetryEvent>).detail
     handler(telemetryEvent)
+  }
+
+  telemetryEmitter.addEventListener("telemetry", listener)
+  return () => telemetryEmitter.removeEventListener("telemetry", listener)
+}
+
 export function emitTelemetry(type: TelemetryEventType, options?: TelemetryEventOptions): TelemetryEvent
 export function emitTelemetry(event: TelemetryEventInput): TelemetryEvent
 export function emitTelemetry(
@@ -211,6 +192,7 @@ export function emitTelemetry(
   // Queue asynchronously so telemetry cannot block UI or render loops.
   pendingQueue.push(event)
   scheduleFlush()
+  dispatchAsync(event)
 
   // Log to console in development (async-safe)
   if (process.env.NODE_ENV === "development") {
@@ -221,8 +203,7 @@ export function emitTelemetry(
     }
   }
 
-  telemetryEmitter.addEventListener("telemetry", listener)
-  return () => telemetryEmitter.removeEventListener("telemetry", listener)
+  return event
 }
 
 export function getRecentEvents(limit = 50): TelemetryEvent[] {
