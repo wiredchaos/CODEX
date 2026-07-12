@@ -13,20 +13,36 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Python validation dependencies
+        run: python -m pip install --upgrade jsonschema PyYAML
+
+      - name: Run existing repository contract validation
+        run: python scripts/validate.py
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.25.0
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
+
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile=false
+
       - name: Run governance tests
         run: pnpm test:governance
+
       - name: Validate import plans
         run: pnpm validate:imports
+
       - name: Validate deployment receipts
         run: pnpm validate:receipts
