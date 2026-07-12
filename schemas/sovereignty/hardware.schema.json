@@ -1,7 +1,15 @@
 {
-  "title": "Sovereignty hardware registry schema",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wiredchaos.dev/schemas/sovereignty/hardware.schema.json",
+  "title": "Sovereignty hardware registry record",
   "type": "object",
   "additionalProperties": false,
-  "description": "Strict schema placeholder enforced by src/sovereignty/registry.ts in CI.",
-  "$schema": "https://json-schema.org/draft/2020-12/schema"
+  "required": ["id", "status", "providerId", "throughput", "notes"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["mock", "development_only", "not_verified", "active", "disabled", "quarantined"] },
+    "providerId": { "type": "string", "minLength": 1 },
+    "throughput": { "oneOf": [{ "type": "number", "minimum": 0 }, { "enum": ["unknown", "not_verified"] }] },
+    "notes": { "type": "string", "minLength": 1 }
+  }
 }
