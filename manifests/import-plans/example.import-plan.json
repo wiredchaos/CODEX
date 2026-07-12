@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0.0",
+  "planId": "mission-control-cloudflare-pages",
+  "sourceRepo": "wiredchaos/mission-control",
+  "runtime": "cloudflare-pages",
+  "targets": [
+    { "targetId": "mission-control-preview", "environment": "preview" },
+    { "targetId": "mission-control-production", "environment": "production" }
+  ]
+}

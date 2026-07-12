@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0.0",
+  "deploymentId": "replace-with-deployment-id",
+  "environment": "preview",
+  "target": "mission-control-preview",
+  "sourceRepo": "wiredchaos/mission-control",
+  "runtime": "cloudflare-pages",
+  "commitSha": "1234567890abcdef1234567890abcdef12345678",
+  "validation": {
+    "status": "pending",
+    "healthChecks": []
+  },
+  "rollback": {
+    "reference": ""
+  },
+  "notes": "Template only. Rename to <deploymentId>.receipt.json only after replacing placeholders with real evidence."
+}

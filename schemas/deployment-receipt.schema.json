@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentropolis.deploy/schemas/deployment-receipt.schema.json",
+  "title": "AGENTROPOLIS deployment receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "deploymentId", "environment", "target", "sourceRepo", "runtime", "commitSha", "validation", "rollback"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "deploymentId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$" },
+    "environment": { "type": "string", "enum": ["preview", "staging", "production"] },
+    "target": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$" },
+    "sourceRepo": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+    "runtime": { "type": "string", "enum": ["cloudflare-workers", "cloudflare-pages", "static-site", "node-service", "documentation"] },
+    "commitSha": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "healthChecks"],
+      "properties": {
+        "status": { "type": "string", "enum": ["passed", "failed", "pending"] },
+        "healthChecks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "status"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "status": { "type": "string", "enum": ["passed", "failed", "pending"] },
+              "url": { "type": "string", "minLength": 1 },
+              "checkedAt": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reference"],
+      "properties": {
+        "reference": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    },
+    "notes": { "type": "string" }
+  }
+}

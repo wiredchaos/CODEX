@@ -12,7 +12,11 @@
     "turbo:build": "turbo run build",
     "turbo:test": "turbo run test",
     "turbo:lint": "turbo run lint",
-    "dev:boot": "pnpm install && pnpm turbo run build && pnpm turbo run test"
+    "dev:boot": "pnpm install && pnpm turbo run build && pnpm turbo run test",
+    "validate:imports": "node infrastructure/scripts/validate-import-plans.mjs",
+    "validate:receipts": "node infrastructure/scripts/validate-deployment-receipts.mjs",
+    "validate": "pnpm validate:imports && pnpm validate:receipts",
+    "test:governance": "node tests/governance/receipt-validator.test.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentropolis.deploy/schemas/import-plan.schema.json",
+  "title": "AGENTROPOLIS deployment import plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "planId", "sourceRepo", "runtime", "targets"],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "planId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$" },
+    "sourceRepo": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+    "runtime": { "type": "string", "enum": ["cloudflare-workers", "cloudflare-pages", "static-site", "node-service", "documentation"] },
+    "targets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["targetId", "environment"],
+        "properties": {
+          "targetId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$" },
+          "environment": { "type": "string", "enum": ["preview", "staging", "production"] },
+          "route": { "type": "string", "minLength": 1 },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}
