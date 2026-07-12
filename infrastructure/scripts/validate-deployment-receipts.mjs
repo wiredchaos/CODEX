@@ -46,7 +46,12 @@ for (const file of await listFiles(importPlansDir, '.import-plan.json')) {
       if (targets.has(target.targetId)) {
         errors.push(`Import target '${target.targetId}' is declared more than once.`);
       }
-      targets.set(target.targetId, { sourceRepo: plan.sourceRepo, runtime: plan.runtime, environment: target.environment, planId: plan.planId });
+      targets.set(target.targetId, {
+        sourceRepo: plan.sourceRepo,
+        runtime: plan.runtime,
+        environment: target.environment,
+        planId: plan.planId
+      });
     }
   } catch (error) {
     errors.push(`${path.relative(root, file)} is not valid JSON: ${error.message}`);
@@ -92,6 +97,9 @@ for (const file of receiptFiles) {
     }
     if (receipt.runtime !== target.runtime) {
       errors.push(`${rel} runtime '${receipt.runtime}' must match import plan '${target.planId}' runtime '${target.runtime}'.`);
+    }
+    if (receipt.environment !== target.environment) {
+      errors.push(`${rel} environment '${receipt.environment}' must match import target '${receipt.target}' environment '${target.environment}'.`);
     }
   }
 
