@@ -1,7 +1,24 @@
 {
-  "title": "Sovereignty rights registry schema",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wiredchaos.dev/schemas/sovereignty/rights.schema.json",
+  "title": "Sovereignty rights registry record",
   "type": "object",
   "additionalProperties": false,
-  "description": "Strict schema placeholder enforced by src/sovereignty/registry.ts in CI.",
-  "$schema": "https://json-schema.org/draft/2020-12/schema"
+  "required": ["id", "status", "licenseStatus", "commercialUse", "redistribution", "modification", "prohibitedJurisdictions", "reviewDate", "evidenceUrl", "notes"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["mock", "development_only", "not_verified", "active", "disabled"] },
+    "licenseStatus": { "enum": ["allowed", "prohibited", "unknown", "not_verified"] },
+    "commercialUse": { "enum": ["allowed", "prohibited", "unknown"] },
+    "redistribution": { "enum": ["allowed", "prohibited", "unknown"] },
+    "modification": { "enum": ["allowed", "prohibited", "unknown"] },
+    "prohibitedJurisdictions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "reviewDate": { "type": "string", "format": "date" },
+    "evidenceUrl": { "type": "string", "format": "uri" },
+    "notes": { "type": "string", "minLength": 1 }
+  }
 }
