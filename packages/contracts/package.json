@@ -5,7 +5,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest --testMatch \"**/dist/__tests__/**/*.test.js\"",
+    "test": "jest",
     "validate": "node scripts/validate-schemas.js",
     "bundle": "node scripts/bundle-schemas.js"
   },
