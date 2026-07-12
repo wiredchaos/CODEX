@@ -1,5 +1,5 @@
 {
-  "name": "codex",
+  "name": "@chaos/web",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -12,7 +12,9 @@
     "turbo:build": "turbo run build",
     "turbo:test": "turbo run test",
     "turbo:lint": "turbo run lint",
-    "dev:boot": "pnpm install && pnpm turbo run build && pnpm turbo run test"
+    "dev:boot": "pnpm install && pnpm turbo run build && pnpm turbo run test",
+    "typecheck": "tsc -p tsconfig.spatial.json --noEmit",
+    "test": "jest"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
