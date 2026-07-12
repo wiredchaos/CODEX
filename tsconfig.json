@@ -1,47 +1,37 @@
 {
   "compilerOptions": {
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
     "target": "ES2022",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "react-jsx",
-    "incremental": true,
-    "types": [
-      "node",
-      "jest"
-    ],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
+    "resolveJsonModule": true,
+    "outDir": "dist",
+    "rootDir": ".",
+    "types": [
+      "node"
+    ],
     "paths": {
-      "@/*": [
-        "./*"
+      "@kdao/*": [
+        "packages/*/src"
       ]
     },
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "baseUrl": "."
   },
   "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    "apps/**/*.ts",
+    "packages/**/*.ts",
+    "prisma/**/*.ts",
+    "tests/**/*.ts",
+    "eslint.config.js"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist",
+    "site",
+    "wired-chaos-meta",
+    "wired-chaos-stack"
   ]
 }

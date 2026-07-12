@@ -1,23 +1,15 @@
-name: NTKO2090 CI
-
-on:
-  pull_request:
-  push:
-    branches: [main]
-
+name: CI
+on: [push, pull_request]
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 10
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @chaos/web typecheck
-      - run: pnpm --filter @chaos/web build
-      - run: pnpm --filter @chaos/web test
+        with: { node-version: '22', cache: 'npm' }
+      - run: npm install
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run prisma:validate
+      - run: npm run build

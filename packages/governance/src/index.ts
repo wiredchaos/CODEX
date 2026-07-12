@@ -1,0 +1,8 @@
+import { randomUUID } from 'node:crypto';
+import { z } from 'zod';
+export const proposalStatuses = ['DRAFT','REVIEW','ACTIVE','PASSED','REJECTED','CANCELLED','EXECUTED'] as const;
+export const proposalSchema = z.object({ title: z.string().min(3), body: z.string().min(10), authorId: z.string().min(1), status: z.enum(proposalStatuses).default('DRAFT'), votingStartsAt: z.coerce.date().optional(), votingEndsAt: z.coerce.date().optional() });
+export const voteSchema = z.object({ voterId: z.string().min(1), choice: z.enum(['FOR','AGAINST','ABSTAIN']), votingPowerSource: z.string().default('off-chain-membership') });
+export type Proposal = z.infer<typeof proposalSchema> & { id:string; result?: string; createdAt:Date; updatedAt:Date };
+export type Vote = z.infer<typeof voteSchema> & { id:string; proposalId:string; createdAt:Date };
+export class GovernanceService { proposals = new Map<string,Proposal>(); votes: Vote[]=[]; createProposal(input:z.infer<typeof proposalSchema>){ const now=new Date(); const proposal={ id:`prop_${randomUUID()}`, createdAt:now, updatedAt:now, ...input } as Proposal; this.proposals.set(proposal.id,proposal); return proposal; } list(){ return [...this.proposals.values()]; } get(id:string){ return this.proposals.get(id) ?? null; } update(id:string,input:Partial<z.infer<typeof proposalSchema>>){ const proposal=this.get(id); if(!proposal) return null; const updated={...proposal,...input,updatedAt:new Date()} as Proposal; this.proposals.set(id,updated); return updated; } vote(proposalId:string,input:z.infer<typeof voteSchema>){ if(!this.proposals.has(proposalId)) return null; const vote={ id:`vote_${randomUUID()}`, proposalId, createdAt:new Date(), ...input }; this.votes.push(vote); return vote; } }

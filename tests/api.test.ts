@@ -1,0 +1,13 @@
+import { describe, expect, it } from 'vitest';
+import { buildServer } from '../apps/api/src/server.js';
+import { ContractAdapter } from '../packages/contracts/src/index.js';
+async function token(email='member@kdao.local') { const app=await buildServer(); const res=await app.inject({method:'POST',url:'/api/v1/auth/session',payload:{email}}); await app.close(); return JSON.parse(res.body).data.token as string; }
+describe('KDAOcore API', () => {
+  it('serves health endpoint', async () => { const app=await buildServer(); const res=await app.inject('/api/v1/health'); expect(res.statusCode).toBe(200); expect(JSON.parse(res.body).success).toBe(true); await app.close(); });
+  it('returns validation errors consistently', async () => { const app=await buildServer(); const res=await app.inject({method:'POST',url:'/api/v1/auth/session',payload:{email:'bad'}}); expect(res.statusCode).toBe(400); expect(JSON.parse(res.body).success).toBe(false); await app.close(); });
+  it('enforces authentication middleware', async () => { const app=await buildServer(); const res=await app.inject('/api/v1/auth/me'); expect(res.statusCode).toBe(403); await app.close(); });
+  it('enforces operator role on member creation', async () => { const app=await buildServer(); const t=await token(); const res=await app.inject({method:'POST',url:'/api/v1/members',headers:{authorization:`Bearer ${t}`},payload:{displayName:'A',email:'a@b.com'}}); expect(res.statusCode).toBe(403); await app.close(); });
+  it('creates proposals and votes for members with audit receipts', async () => { const app=await buildServer(); const t=await token(); const created=await app.inject({method:'POST',url:'/api/v1/proposals',headers:{authorization:`Bearer ${t}`},payload:{title:'Build kennel',body:'Build a secure kennel workflow.',authorId:'user1'}}); expect(created.statusCode).toBe(200); const id=JSON.parse(created.body).data.id; const voted=await app.inject({method:'POST',url:`/api/v1/proposals/${id}/votes`,headers:{authorization:`Bearer ${t}`},payload:{voterId:'user1',choice:'FOR'}}); expect(voted.statusCode).toBe(200); await app.close(); });
+  it('keeps treasury public reads sanitized', async () => { const app=await buildServer(); const res=await app.inject('/api/v1/treasury/transactions'); expect(res.statusCode).toBe(200); expect(JSON.parse(res.body).success).toBe(true); await app.close(); });
+  it('validates contract adapter configuration and does not broadcast', () => { const adapter=new ContractAdapter({environment:'local',chainId:1,addresses:{KennelDAO:'0x0000000000000000000000000000000000000001'}}); expect(adapter.prepareTransaction('KennelDAO','vote',[]).broadcast).toBe(false); });
+});

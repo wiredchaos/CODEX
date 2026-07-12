@@ -1,0 +1,6 @@
+import { randomUUID } from 'node:crypto';
+import { z } from 'zod';
+import type { Role } from '../../policy/src/index.js';
+export const memberSchema = z.object({ displayName: z.string().min(1), email: z.string().email(), roles: z.array(z.enum(['PUBLIC','MEMBER','CONTRIBUTOR','MODERATOR','OPERATOR','ADMIN'])).default(['MEMBER']), profileImageUrl: z.string().url().optional(), walletAddresses: z.array(z.string()).default([]), doginalRefs: z.array(z.string()).default([]) });
+export type Member = z.infer<typeof memberSchema> & { id: string; status: 'ACTIVE'|'SUSPENDED'; joinedAt: Date; createdAt: Date; updatedAt: Date };
+export class MemberService { private members = new Map<string, Member>(); list(){ return [...this.members.values()]; } get(id:string){ return this.members.get(id) ?? null; } create(input:z.infer<typeof memberSchema>){ const now = new Date(); const member: Member = { id: `mem_${randomUUID()}`, status:'ACTIVE', joinedAt:now, createdAt:now, updatedAt:now, ...input, roles: input.roles as Role[] }; this.members.set(member.id, member); return member; } update(id:string,input:Partial<z.infer<typeof memberSchema>>){ const member=this.get(id); if(!member) return null; const updated={...member,...input,updatedAt:new Date()} as Member; this.members.set(id,updated); return updated; } }

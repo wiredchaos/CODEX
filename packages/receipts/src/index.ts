@@ -1,0 +1,4 @@
+import { createHash, randomUUID } from 'node:crypto';
+export type AuditReceipt = { id: string; actorId: string; action: string; resourceType: string; resourceId: string; requestId: string; timestamp: Date; status: 'SUCCESS' | 'FAILURE'; metadata?: Record<string, unknown>; previousStateHash?: string; resultingStateHash?: string };
+export const hashState = (value: unknown) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+export class InMemoryReceiptService { public receipts: AuditReceipt[] = []; create(input: Omit<AuditReceipt,'id'|'timestamp'>) { const receipt = { id: randomUUID(), timestamp: new Date(), ...input }; this.receipts.push(receipt); return receipt; } list() { return this.receipts; } get(id: string) { return this.receipts.find((receipt) => receipt.id === id) ?? null; } }

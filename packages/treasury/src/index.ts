@@ -1,0 +1,2 @@
+export type TreasuryTransaction = { id:string; walletId:string; asset:string; amount:string; direction:'IN'|'OUT'; occurredAt:Date; internalNotes?:string };
+export class TreasuryService { transactions: TreasuryTransaction[]=[]; summary(){ return { wallets:0, assets:0, balanceCount:0, note:'Public summary excludes internal notes.' }; } listTransactions(includeInternal=false){ return this.transactions.map(({internalNotes,...tx}) => includeInternal ? {...tx, internalNotes} : tx); } }

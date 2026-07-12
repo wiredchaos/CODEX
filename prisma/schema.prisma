@@ -1,157 +1,25 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-model User {
-  id        String          @id @default(cuid())
-  email     String          @unique
-  createdAt DateTime        @default(now())
-  accounts  TokenAccount[]
-  payments  PaymentIntent[]
-  sessions  CheckoutSession[]
-  ledger    LedgerEntry[]
-}
-
-model TokenAccount {
-  id        String        @id @default(cuid())
-  user      User          @relation(fields: [userId], references: [id])
-  userId    String
-  tokenType String        @default("WC_TOKEN")
-  balance   Int           @default(0)
-  ledger    LedgerEntry[]
-  createdAt DateTime      @default(now())
-
-  @@unique([userId, tokenType])
-}
-
-enum LedgerEntryType {
-  CREDIT_FIAT_PURCHASE
-  DEBIT_SPEND
-  CREDIT_REWARD
-  DEBIT_REFUND_REVERSAL
-  CREDIT_ADJUSTMENT
-  DEBIT_ADJUSTMENT
-  HOLD
-  RELEASE
-}
-
-enum LedgerStatus {
-  PENDING
-  SETTLED
-  FAILED
-  REVERSED
-}
-
-model LedgerEntry {
-  id          String          @id @default(cuid())
-  user        User            @relation(fields: [userId], references: [id])
-  userId      String
-  account     TokenAccount    @relation(fields: [accountId], references: [id])
-  accountId   String
-  type        LedgerEntryType
-  amount      Int
-  currency    String
-  status      LedgerStatus    @default(SETTLED)
-  reasonCode  String
-  metadata    Json?
-  createdAt   DateTime        @default(now())
-
-  @@index([userId])
-  @@index([accountId])
-}
-
-enum PaymentStatus {
-  CREATED
-  REQUIRES_ACTION
-  SUCCEEDED
-  FAILED
-  CANCELED
-  REFUNDED
-}
-
-model PaymentIntent {
-  id               String         @id @default(cuid())
-  user             User           @relation(fields: [userId], references: [id])
-  userId           String
-  provider         String
-  providerIntentId String
-  amountFiat       Int
-  fiatCurrency     String
-  status           PaymentStatus  @default(CREATED)
-  idempotencyKey   String
-  metadata         Json?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  sessions         CheckoutSession[]
-
-  @@unique([provider, providerIntentId])
-  @@unique([provider, providerIntentId, idempotencyKey])
-}
-
-enum CheckoutStatus {
-  CREATED
-  REDIRECTED
-  COMPLETED
-  CANCELED
-}
-
-model CheckoutSession {
-  id             String          @id @default(cuid())
-  user           User            @relation(fields: [userId], references: [id])
-  userId         String
-  paymentIntent  PaymentIntent   @relation(fields: [paymentIntentId], references: [id])
-  paymentIntentId String
-  status         CheckoutStatus  @default(CREATED)
-  returnUrl      String
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-}
-
-model World {
-  id             String          @id
-  name           String
-  description    String?
-  tokens         String          // JSON array of tokens like ["3DT", "AKIRA_CODEX"]
-  metadata       Json?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  patches        Patch[]
-  timelineEvents TimelineEvent[]
-}
-
-model Patch {
-  id                String          @id
-  world             World           @relation(fields: [worldId], references: [id])
-  worldId           String
-  invariant         String          // Core rule/invariant this patch enforces
-  scope             String          // What area of the system this applies to
-  enforcement       String          // How the invariant is enforced
-  observableEffects String          // What observable effects this patch has
-  metadata          Json?
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  timelineEvents    TimelineEvent[]
-
-  @@index([worldId])
-}
-
-model TimelineEvent {
-  id          String   @id @default(cuid())
-  world       World    @relation(fields: [worldId], references: [id])
-  worldId     String
-  patch       Patch?   @relation(fields: [patchId], references: [id])
-  patchId     String?
-  eventType   String   // e.g., "PATCH_APPLIED", "WORLD_CREATED", "ARTIFACT_MATCHED"
-  description String
-  metadata    Json?
-  timestamp   DateTime @default(now())
-
-  @@index([worldId])
-  @@index([patchId])
-  @@index([timestamp])
-}
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+enum RoleName { PUBLIC MEMBER CONTRIBUTOR MODERATOR OPERATOR ADMIN }
+enum MemberStatus { ACTIVE SUSPENDED DELETED }
+enum ProposalStatus { DRAFT REVIEW ACTIVE PASSED REJECTED CANCELLED EXECUTED }
+enum VoteChoice { FOR AGAINST ABSTAIN }
+enum TxDirection { IN OUT }
+model User { id String @id @default(cuid()) email String @unique displayName String? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt deletedAt DateTime? profile MemberProfile? roles UserRole[] proposals Proposal[] votes Vote[] }
+model MemberProfile { id String @id @default(cuid()) userId String @unique user User @relation(fields:[userId], references:[id]) status MemberStatus @default(ACTIVE) profileImageUrl String? walletAddresses String[] @default([]) doginalRefs String[] @default([]) joinedAt DateTime @default(now()) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt deletedAt DateTime? @@index([status]) }
+model Role { id String @id @default(cuid()) name RoleName @unique users UserRole[] }
+model UserRole { userId String roleId String user User @relation(fields:[userId], references:[id]) role Role @relation(fields:[roleId], references:[id]) assignedAt DateTime @default(now()) @@id([userId, roleId]) }
+model Proposal { id String @id @default(cuid()) title String body String status ProposalStatus @default(DRAFT) authorId String author User @relation(fields:[authorId], references:[id]) votingStartsAt DateTime? votingEndsAt DateTime? result String? moderationActions Json? votes Vote[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt deletedAt DateTime? @@index([status]) @@index([authorId]) }
+model Vote { id String @id @default(cuid()) proposalId String proposal Proposal @relation(fields:[proposalId], references:[id]) voterId String voter User @relation(fields:[voterId], references:[id]) choice VoteChoice votingPowerSource String createdAt DateTime @default(now()) @@unique([proposalId, voterId]) }
+model Project { id String @id @default(cuid()) name String description String status String ownerId String members ProjectMember[] milestones Milestone[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt deletedAt DateTime? @@index([ownerId]) }
+model ProjectMember { id String @id @default(cuid()) projectId String project Project @relation(fields:[projectId], references:[id]) userId String role String createdAt DateTime @default(now()) @@index([userId]) }
+model Milestone { id String @id @default(cuid()) projectId String project Project @relation(fields:[projectId], references:[id]) title String status String dueAt DateTime? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
+model Bounty { id String @id @default(cuid()) title String description String reward String status String statusHistory Json? submissions BountySubmission[] createdAt DateTime @default(now()) updatedAt DateTime @updatedAt deletedAt DateTime? @@index([status]) }
+model BountySubmission { id String @id @default(cuid()) bountyId String bounty Bounty @relation(fields:[bountyId], references:[id]) contributorId String contentUrl String notes String? review Json? approval Json? payout Json? status String @default("SUBMITTED") createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@index([contributorId]) }
+model TreasuryWallet { id String @id @default(cuid()) label String address String @unique chain String isPublic Boolean @default(false) createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
+model TreasuryAsset { id String @id @default(cuid()) symbol String name String chain String contractAddress String? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt @@unique([symbol, chain]) }
+model TreasuryTransaction { id String @id @default(cuid()) walletAddress String assetSymbol String amount Decimal direction TxDirection txHash String? reportingPeriod String? internalNotes String? occurredAt DateTime createdAt DateTime @default(now()) @@index([walletAddress]) @@index([reportingPeriod]) }
+model ContractDeployment { id String @id @default(cuid()) environment String chainId Int contractName String address String abiPath String? createdAt DateTime @default(now()) @@unique([environment, chainId, contractName]) }
+model ContractEvent { id String @id @default(cuid()) deploymentId String eventName String txHash String blockNumber BigInt payload Json receiptId String? createdAt DateTime @default(now()) @@index([txHash]) }
+model AuditReceipt { id String @id @default(cuid()) actorId String action String resourceType String resourceId String requestId String timestamp DateTime @default(now()) status String metadata Json? previousStateHash String? resultingStateHash String? @@index([actorId]) @@index([resourceType, resourceId]) }
+model Notification { id String @id @default(cuid()) channel String recipient String subject String? body String status String providerMessageId String? createdAt DateTime @default(now()) updatedAt DateTime @updatedAt }
