@@ -1,7 +1,18 @@
 {
-  "title": "Sovereignty provider registry schema",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wiredchaos.dev/schemas/sovereignty/provider.schema.json",
+  "title": "Sovereignty provider registry record",
   "type": "object",
   "additionalProperties": false,
-  "description": "Strict schema placeholder enforced by src/sovereignty/registry.ts in CI.",
-  "$schema": "https://json-schema.org/draft/2020-12/schema"
+  "required": ["id", "status", "type", "approvedForRestricted", "jurisdictionId", "health", "endpointUrl", "notes"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["mock", "development_only", "not_verified", "active", "disabled", "quarantined"] },
+    "type": { "enum": ["cloud", "local", "private", "deterministic"] },
+    "approvedForRestricted": { "type": "boolean" },
+    "jurisdictionId": { "type": "string", "minLength": 1 },
+    "health": { "enum": ["healthy", "degraded", "unhealthy", "disabled", "quarantined"] },
+    "endpointUrl": { "type": "string", "format": "uri" },
+    "notes": { "type": "string", "minLength": 1 }
+  }
 }
