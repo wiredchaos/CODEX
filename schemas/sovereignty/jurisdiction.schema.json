@@ -1,7 +1,15 @@
 {
-  "title": "Sovereignty jurisdiction registry schema",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wiredchaos.dev/schemas/sovereignty/jurisdiction.schema.json",
+  "title": "Sovereignty jurisdiction registry record",
   "type": "object",
   "additionalProperties": false,
-  "description": "Strict schema placeholder enforced by src/sovereignty/registry.ts in CI.",
-  "$schema": "https://json-schema.org/draft/2020-12/schema"
+  "required": ["id", "status", "countryCode", "restrictedDataAllowed", "notes"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["mock", "development_only", "not_verified", "active", "disabled", "quarantined"] },
+    "countryCode": { "type": "string", "pattern": "^[A-Z]{2}$" },
+    "restrictedDataAllowed": { "type": "boolean" },
+    "notes": { "type": "string", "minLength": 1 }
+  }
 }
