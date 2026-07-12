@@ -8,7 +8,7 @@ type ContractEvent = {
   [key: string]: unknown;
 };
 
-const ajv = new Ajv({ strict: true, validateFormats: false });
+const ajv = new Ajv({ strict: true });
 const validateBase = ajv.compile(baseSchema);
 
 export function validateEvent(event: ContractEvent): void {
@@ -18,7 +18,7 @@ export function validateEvent(event: ContractEvent): void {
     throw new Error(JSON.stringify(validateBase.errors));
   }
 
-  assertMissingScopesDenied(Array.isArray(event.scopes) ? event.scopes : []);
+  assertMissingScopesDenied(event.scopes ?? []);
 
   if (typeof event.operation === "string") {
     assertNoXPMappings(event.operation);
