@@ -14,7 +14,11 @@
     "turbo:lint": "turbo run lint",
     "dev:boot": "pnpm install && pnpm turbo run build && pnpm turbo run test",
     "typecheck": "tsc -p tsconfig.spatial.json --noEmit",
-    "test": "jest"
+    "test": "jest",
+    "validate:imports": "node infrastructure/scripts/validate-import-plans.mjs",
+    "validate:receipts": "node infrastructure/scripts/validate-deployment-receipts.mjs",
+    "test:governance": "node --test infrastructure/tests/*.test.mjs",
+    "validate": "pnpm validate:imports && pnpm validate:receipts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
