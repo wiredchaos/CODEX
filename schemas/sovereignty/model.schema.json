@@ -11,8 +11,18 @@
     "providerId": { "type": "string", "minLength": 1 },
     "rightsId": { "type": "string", "minLength": 1 },
     "hardwareId": { "type": "string", "minLength": 1 },
-    "capabilities": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["chat", "embedding", "vision", "audio", "tool_use"] } },
-    "operations": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["inference", "embedding", "classification", "generation"] } },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "enum": ["chat", "embedding", "tool_plan", "deterministic_fallback"] }
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "enum": ["inference", "evaluation", "stress_test"] }
+    },
     "costUsd": { "oneOf": [{ "type": "number", "minimum": 0 }, { "enum": ["unknown", "not_verified"] }] },
     "latencyMs": { "oneOf": [{ "type": "number", "minimum": 0 }, { "enum": ["unknown", "not_verified"] }] },
     "notes": { "type": "string", "minLength": 1 }
