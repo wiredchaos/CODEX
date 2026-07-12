@@ -1,15 +1,109 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import Ajv2020 from 'ajv/dist/2020.js';
 import type { Registries } from './types.js';
-const keys = ['models','providers','hardware','rights','jurisdictions'] as const;
-export function loadRegistries(root = 'registry/sovereignty'): Registries { const out: any = {}; for (const k of keys) out[k] = readdirSync(join(root,k)).filter(f=>f.endsWith('.json')).map(f=>JSON.parse(readFileSync(join(root,k,f),'utf8'))); return out; }
-function validUrl(s: string) { try { const u = new URL(s); return ['https:','http:'].includes(u.protocol); } catch { return false; } }
-export function validateRegistries(reg: Registries, now = Date.now()): { ok:boolean; errors:string[]; counts:Record<string,number> } { const errors:string[]=[]; const counts:any={}; for (const k of keys) { counts[k]=reg[k].length; const seen = new Set<string>(); for (const rec of reg[k] as any[]) { if (!rec.id) errors.push(`${k}: missing id`); if (seen.has(rec.id)) errors.push(`${k}: duplicate id ${rec.id}`); seen.add(rec.id); } }
- const sets = Object.fromEntries(keys.map(k=>[k,new Set((reg[k] as any[]).map((r:any)=>r.id))]));
- const status = new Set(['active','disabled','mock','not_verified','development_only']); const caps = new Set(['chat','embedding','tool_plan','deterministic_fallback']); const ops = new Set(['inference','evaluation','stress_test']); const allowedKeys:any = { models:['id','status','providerId','rightsId','hardwareId','capabilities','operations','costUsd','latencyMs','notes'], providers:['id','status','type','approvedForRestricted','jurisdictionId','health','endpointUrl','notes'], hardware:['id','status','providerId','throughput','notes'], rights:['id','status','licenseStatus','commercialUse','redistribution','modification','prohibitedJurisdictions','reviewDate','evidenceUrl','notes'], jurisdictions:['id','status','countryCode','restrictedDataAllowed','notes'] };
- for (const k of keys) for (const rec of reg[k] as any[]) { for (const key of Object.keys(rec)) if (!allowedKeys[k].includes(key)) errors.push(`${k}/${rec.id}: unknown field ${key}`); if (!status.has(rec.status)) errors.push(`${k}/${rec.id}: invalid status`); }
- for (const m of reg.models) { if (!sets.providers.has(m.providerId)) errors.push(`models/${m.id}: missing provider ${m.providerId}`); if (!m.rightsId || !sets.rights.has(m.rightsId)) errors.push(`models/${m.id}: missing rights ${m.rightsId}`); if (m.hardwareId && !sets.hardware.has(m.hardwareId)) errors.push(`models/${m.id}: missing hardware ${m.hardwareId}`); for (const c of m.capabilities) if (!caps.has(c)) errors.push(`models/${m.id}: invalid capability ${c}`); for (const o of m.operations) if (!ops.has(o)) errors.push(`models/${m.id}: invalid operation ${o}`); }
- for (const p of reg.providers) { if (!sets.jurisdictions.has(p.jurisdictionId)) errors.push(`providers/${p.id}: missing jurisdiction ${p.jurisdictionId}`); if (!validUrl(p.endpointUrl)) errors.push(`providers/${p.id}: malformed URL`); }
- for (const h of reg.hardware) if (!sets.providers.has(h.providerId)) errors.push(`hardware/${h.id}: missing provider ${h.providerId}`);
- for (const r of reg.rights) { if (!validUrl(r.evidenceUrl)) errors.push(`rights/${r.id}: malformed URL`); if (!r.reviewDate || Date.parse(r.reviewDate) < now) errors.push(`rights/${r.id}: expired review date`); }
- return { ok: errors.length===0, errors, counts } }
+
+const keys = ['models', 'providers', 'hardware', 'rights', 'jurisdictions'] as const;
+const schemaFiles: Record<(typeof keys)[number], string> = {
+  models: 'model.schema.json',
+  providers: 'provider.schema.json',
+  hardware: 'hardware.schema.json',
+  rights: 'rights.schema.json',
+  jurisdictions: 'jurisdiction.schema.json'
+};
+
+export function loadRegistries(root = 'registry/sovereignty'): Registries {
+  const out: Partial<Registries> = {};
+  for (const key of keys) {
+    out[key] = readdirSync(join(root, key))
+      .filter((file) => file.endsWith('.json'))
+      .map((file) => JSON.parse(readFileSync(join(root, key, file), 'utf8')));
+  }
+  return out as Registries;
+}
+
+function validUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return ['https:', 'http:'].includes(url.protocol);
+  } catch {
+    return false;
+  }
+}
+
+function validDate(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
+}
+
+function schemaValidators(schemaRoot = 'schemas/sovereignty') {
+  const ajv = new Ajv2020({ allErrors: true, strict: false, validateFormats: false });
+  return Object.fromEntries(
+    keys.map((key) => {
+      const schema = JSON.parse(readFileSync(join(schemaRoot, schemaFiles[key]), 'utf8'));
+      return [key, ajv.compile(schema)];
+    })
+  ) as Record<(typeof keys)[number], ReturnType<Ajv2020['compile']>>;
+}
+
+export function validateRegistries(
+  reg: Registries,
+  now = Date.now(),
+  schemaRoot = 'schemas/sovereignty'
+): { ok: boolean; errors: string[]; counts: Record<string, number> } {
+  const errors: string[] = [];
+  const counts: Record<string, number> = {};
+  const validators = schemaValidators(schemaRoot);
+
+  for (const key of keys) {
+    counts[key] = reg[key].length;
+    const seen = new Set<string>();
+
+    for (const record of reg[key] as Array<Record<string, unknown>>) {
+      const validate = validators[key];
+      if (!validate(record)) {
+        for (const issue of validate.errors ?? []) {
+          errors.push(`${key}/${String(record.id ?? 'unknown')}${issue.instancePath || '/'}: ${issue.message}`);
+        }
+      }
+
+      if (typeof record.id === 'string') {
+        if (seen.has(record.id)) errors.push(`${key}: duplicate id ${record.id}`);
+        seen.add(record.id);
+      }
+    }
+  }
+
+  const sets = Object.fromEntries(
+    keys.map((key) => [key, new Set((reg[key] as Array<{ id: string }>).map((record) => record.id))])
+  ) as Record<(typeof keys)[number], Set<string>>;
+
+  for (const model of reg.models) {
+    if (!sets.providers.has(model.providerId)) errors.push(`models/${model.id}: missing provider ${model.providerId}`);
+    if (!sets.rights.has(model.rightsId)) errors.push(`models/${model.id}: missing rights ${model.rightsId}`);
+    if (model.hardwareId && !sets.hardware.has(model.hardwareId)) errors.push(`models/${model.id}: missing hardware ${model.hardwareId}`);
+  }
+
+  for (const provider of reg.providers) {
+    if (!sets.jurisdictions.has(provider.jurisdictionId)) {
+      errors.push(`providers/${provider.id}: missing jurisdiction ${provider.jurisdictionId}`);
+    }
+    if (!validUrl(provider.endpointUrl)) errors.push(`providers/${provider.id}: malformed URL`);
+  }
+
+  for (const hardware of reg.hardware) {
+    if (!sets.providers.has(hardware.providerId)) {
+      errors.push(`hardware/${hardware.id}: missing provider ${hardware.providerId}`);
+    }
+  }
+
+  for (const rights of reg.rights) {
+    if (!validUrl(rights.evidenceUrl)) errors.push(`rights/${rights.id}: malformed URL`);
+    if (!validDate(rights.reviewDate)) {
+      errors.push(`rights/${rights.id}: malformed review date`);
+    } else if (Date.parse(`${rights.reviewDate}T23:59:59Z`) < now) {
+      errors.push(`rights/${rights.id}: expired review date`);
+    }
+  }
+
+  return { ok: errors.length === 0, errors, counts };
+}
