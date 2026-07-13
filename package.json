@@ -18,7 +18,8 @@
     "validate:imports": "node infrastructure/scripts/validate-import-plans.mjs",
     "validate:receipts": "node infrastructure/scripts/validate-deployment-receipts.mjs",
     "test:governance": "node --test infrastructure/tests/*.test.mjs",
-    "validate": "pnpm validate:imports && pnpm validate:receipts"
+    "validate": "pnpm validate:imports && pnpm validate:receipts",
+    "validate:agentic-engineering": "node infrastructure/scripts/validate-agentic-engineering.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

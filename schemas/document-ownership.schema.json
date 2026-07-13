@@ -1,0 +1,235 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wiredchaos.dev/schemas/agentic-engineering/document-ownership.schema.json",
+  "title": "Document Ownership",
+  "type": "object",
+  "required": [
+    "classes"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "classes": {
+      "type": "object",
+      "required": [
+        "observed_operational_reference",
+        "generated_reference",
+        "proposed_interpretation",
+        "architectural_decision",
+        "security_or_policy_record"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "observed_operational_reference": {
+          "type": "object",
+          "required": [
+            "permittedEditors",
+            "requiredEvidence",
+            "approvalRequirements",
+            "protectedPaths",
+            "autonomousUpdatesAllowed"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "permittedEditors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "requiredEvidence": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "approvalRequirements": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "protectedPaths": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "autonomousUpdatesAllowed": {
+              "type": "boolean"
+            }
+          }
+        },
+        "generated_reference": {
+          "type": "object",
+          "required": [
+            "permittedEditors",
+            "requiredEvidence",
+            "approvalRequirements",
+            "protectedPaths",
+            "autonomousUpdatesAllowed"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "permittedEditors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "requiredEvidence": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "approvalRequirements": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "protectedPaths": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "autonomousUpdatesAllowed": {
+              "type": "boolean"
+            }
+          }
+        },
+        "proposed_interpretation": {
+          "type": "object",
+          "required": [
+            "permittedEditors",
+            "requiredEvidence",
+            "approvalRequirements",
+            "protectedPaths",
+            "autonomousUpdatesAllowed"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "permittedEditors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "requiredEvidence": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "approvalRequirements": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "protectedPaths": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "autonomousUpdatesAllowed": {
+              "type": "boolean"
+            }
+          }
+        },
+        "architectural_decision": {
+          "type": "object",
+          "required": [
+            "permittedEditors",
+            "requiredEvidence",
+            "approvalRequirements",
+            "protectedPaths",
+            "autonomousUpdatesAllowed"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "permittedEditors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "requiredEvidence": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "approvalRequirements": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "protectedPaths": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "autonomousUpdatesAllowed": {
+              "type": "boolean"
+            }
+          }
+        },
+        "security_or_policy_record": {
+          "type": "object",
+          "required": [
+            "permittedEditors",
+            "requiredEvidence",
+            "approvalRequirements",
+            "protectedPaths",
+            "autonomousUpdatesAllowed"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "permittedEditors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "requiredEvidence": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "approvalRequirements": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "protectedPaths": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "autonomousUpdatesAllowed": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  }
+}

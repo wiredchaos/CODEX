@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wiredchaos.dev/schemas/agentic-engineering/repository-profile.schema.json",
+  "title": "Repository Profile",
+  "description": "Repository projection of Agentic Engineering Guild policy.",
+  "type": "object",
+  "required": [
+    "inheritedGridPolicy",
+    "districtStandard",
+    "repositoryScripts",
+    "permittedTools",
+    "allowedPaths",
+    "forbiddenPaths",
+    "documentationClasses",
+    "riskOverrides",
+    "runtimeInstructions",
+    "requiredReviews",
+    "protectedFiles",
+    "localSkillExtensions",
+    "policyInheritance"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "inheritedGridPolicy": {
+      "type": "string"
+    },
+    "districtStandard": {
+      "type": "string"
+    },
+    "repositoryScripts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "permittedTools": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "allowedPaths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "forbiddenPaths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "documentationClasses": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "observed_operational_reference",
+          "generated_reference",
+          "proposed_interpretation",
+          "architectural_decision",
+          "security_or_policy_record"
+        ]
+      }
+    },
+    "riskOverrides": {
+      "type": "object",
+      "additionalProperties": {
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ]
+      }
+    },
+    "runtimeInstructions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "requiredReviews": {
+      "type": "object",
+      "required": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "low": {
+          "type": "array",
+          "contains": {
+            "const": "deterministic_checks"
+          },
+          "items": {
+            "type": "string"
+          }
+        },
+        "medium": {
+          "type": "array",
+          "contains": {
+            "const": "independent_implementation_review"
+          },
+          "items": {
+            "type": "string"
+          }
+        },
+        "high": {
+          "type": "array",
+          "allOf": [
+            {
+              "contains": {
+                "const": "architecture_review"
+              }
+            },
+            {
+              "contains": {
+                "const": "security_review"
+              }
+            },
+            {
+              "contains": {
+                "const": "domain_review"
+              }
+            }
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "critical": {
+          "type": "array",
+          "allOf": [
+            {
+              "contains": {
+                "const": "human_approval"
+              }
+            },
+            {
+              "contains": {
+                "const": "reproducible_evidence"
+              }
+            },
+            {
+              "contains": {
+                "const": "rollback_plan"
+              }
+            }
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "protectedFiles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "localSkillExtensions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "policyInheritance": {
+      "type": "object",
+      "required": [
+        "mayExtendDistrictStandard",
+        "mayWeakenDistrictStandard"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "mayExtendDistrictStandard": {
+          "const": true
+        },
+        "mayWeakenDistrictStandard": {
+          "const": false
+        }
+      }
+    }
+  }
+}

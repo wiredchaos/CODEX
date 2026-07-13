@@ -31,3 +31,5 @@ jobs:
         run: pnpm validate:imports
       - name: Validate deployment receipts
         run: pnpm validate:receipts
+      - name: Validate Agentic Engineering Guild
+        run: pnpm validate:agentic-engineering

@@ -1,0 +1,57 @@
+{
+  "shiftId": "SHIFT-TASK-882",
+  "taskId": "TASK-882",
+  "repository": "wiredchaos/example",
+  "branch": "feature/chaos-code-agentic-engineering-guild",
+  "mandate": "Complete Phase One validator documentation corridor.",
+  "executionOwner": {
+    "id": "codex-agent",
+    "role": "implementation-agent"
+  },
+  "agentRuntime": "Codex CLI",
+  "model": "GPT-5.5",
+  "currentPhase": "RECEIPT",
+  "completedWork": [
+    "schemas",
+    "skills",
+    "validator"
+  ],
+  "remainingWork": [],
+  "decisions": [
+    "No deployment capability."
+  ],
+  "filesChanged": [
+    "schemas/engineering-task.schema.json"
+  ],
+  "commandsRun": [
+    "pnpm validate:agentic-engineering"
+  ],
+  "tests": [
+    {
+      "command": "pnpm validate:agentic-engineering",
+      "status": "passed",
+      "evidence": "local output"
+    }
+  ],
+  "reviews": [
+    "medium independent implementation review required"
+  ],
+  "findings": [],
+  "risks": [],
+  "budget": {
+    "maxTokens": 250000,
+    "maxRuntimeMinutes": 90,
+    "maxReviewRounds": 2,
+    "maxRecursionDepth": 4
+  },
+  "budgetConsumption": {
+    "tokensUsed": 0,
+    "runtimeMinutes": 0,
+    "reviewRounds": 1,
+    "recursionDepth": 0
+  },
+  "scopeViolations": [],
+  "rollbackCheckpoint": "git revert HEAD",
+  "handoffState": "sealed sample ready",
+  "receiptStatus": "emitted"
+}

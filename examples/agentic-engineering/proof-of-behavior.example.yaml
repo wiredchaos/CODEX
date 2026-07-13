@@ -1,0 +1,12 @@
+{
+  "intendedBehavior": "Agentic engineering validator enforces Phase One contracts.",
+  "observation": "Validator compiled schemas and rejected negative fixtures.",
+  "environment": "local Node test runner",
+  "provingTest": "pnpm validate:agentic-engineering",
+  "negativeCase": "Receipt with critical risk and no approval is rejected.",
+  "failureSignal": "AJV validation error or custom validator failure",
+  "unresolvedUncertainty": [],
+  "evidenceReferences": [
+    "infrastructure/tests/agentic-engineering.test.mjs"
+  ]
+}
