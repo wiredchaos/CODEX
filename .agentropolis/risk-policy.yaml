@@ -1,0 +1,20 @@
+{
+  "reviewRouting": {
+    "low": [
+      "deterministic_checks"
+    ],
+    "medium": [
+      "independent_implementation_review"
+    ],
+    "high": [
+      "architecture_review",
+      "security_review",
+      "domain_review"
+    ],
+    "critical": [
+      "human_approval",
+      "reproducible_evidence",
+      "rollback_plan"
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "taskId": "TASK-882",
+  "repository": "wiredchaos/example",
+  "priority": "high",
+  "riskTier": "medium",
+  "district": "chaos-code",
+  "requiredSkills": [
+    "ROUTER",
+    "SHIFT",
+    "SURVEY",
+    "PLANLOCK",
+    "RUNNER",
+    "TARGET",
+    "RIVAL",
+    "SEAL"
+  ],
+  "acceptanceCriteria": [
+    "Validator rejects missing evidence."
+  ],
+  "budget": {
+    "maxTokens": 250000,
+    "maxRuntimeMinutes": 90,
+    "maxReviewRounds": 2,
+    "maxRecursionDepth": 4
+  },
+  "permissions": {
+    "writePaths": [
+      "schemas/**",
+      "examples/**"
+    ],
+    "forbiddenPaths": [
+      ".env",
+      "**/*.pem"
+    ],
+    "allowedTools": [
+      "node",
+      "pnpm"
+    ]
+  },
+  "humanApproval": {
+    "requiredFor": []
+  },
+  "nonGoals": [
+    "production deployment"
+  ],
+  "stopConditions": [
+    "scope violation"
+  ]
+}

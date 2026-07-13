@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wiredchaos.dev/schemas/agentic-engineering/risk-policy.schema.json",
+  "title": "Risk Policy",
+  "type": "object",
+  "required": [
+    "reviewRouting"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "reviewRouting": {
+      "type": "object",
+      "required": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "low": {
+          "type": "array",
+          "contains": {
+            "const": "deterministic_checks"
+          },
+          "items": {
+            "type": "string"
+          }
+        },
+        "medium": {
+          "type": "array",
+          "contains": {
+            "const": "independent_implementation_review"
+          },
+          "items": {
+            "type": "string"
+          }
+        },
+        "high": {
+          "type": "array",
+          "allOf": [
+            {
+              "contains": {
+                "const": "architecture_review"
+              }
+            },
+            {
+              "contains": {
+                "const": "security_review"
+              }
+            },
+            {
+              "contains": {
+                "const": "domain_review"
+              }
+            }
+          ],
+          "items": {
+            "type": "string"
+          }
+        },
+        "critical": {
+          "type": "array",
+          "allOf": [
+            {
+              "contains": {
+                "const": "human_approval"
+              }
+            },
+            {
+              "contains": {
+                "const": "reproducible_evidence"
+              }
+            },
+            {
+              "contains": {
+                "const": "rollback_plan"
+              }
+            },
+            {
+              "not": {
+                "contains": {
+                  "const": "implementer_self_approval"
+                }
+              }
+            }
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
