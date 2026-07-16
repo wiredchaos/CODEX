@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "jest"]
+  },
+  "include": [
+    "next-env.d.ts",
+    "app/page.tsx",
+    "app/layout.tsx",
+    "components/spatial/**/*.ts",
+    "components/spatial/**/*.tsx",
+    "__tests__/spatial/**/*.tsx"
+  ],
+  "exclude": ["node_modules"]
+}

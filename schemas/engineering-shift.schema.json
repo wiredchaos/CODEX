@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wiredchaos.dev/schemas/agentic-engineering/engineering-shift.schema.json",
+  "title": "Engineering Shift",
+  "description": "Traceable execution shift for an agentic engineering mandate.",
+  "type": "object",
+  "required": [
+    "shiftId",
+    "taskId",
+    "repository",
+    "branch",
+    "mandate",
+    "executionOwner",
+    "agentRuntime",
+    "model",
+    "currentPhase",
+    "completedWork",
+    "remainingWork",
+    "decisions",
+    "filesChanged",
+    "commandsRun",
+    "tests",
+    "reviews",
+    "findings",
+    "risks",
+    "budget",
+    "budgetConsumption",
+    "scopeViolations",
+    "rollbackCheckpoint",
+    "handoffState",
+    "receiptStatus"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "shiftId": {
+      "type": "string",
+      "pattern": "^SHIFT-[0-9A-Za-z-]+$"
+    },
+    "taskId": {
+      "type": "string"
+    },
+    "repository": {
+      "type": "string"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "mandate": {
+      "type": "string",
+      "minLength": 1
+    },
+    "executionOwner": {
+      "type": "object",
+      "required": [
+        "id",
+        "role"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "agentRuntime": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1
+    },
+    "currentPhase": {
+      "enum": [
+        "TASK",
+        "ROUTER",
+        "SHIFT",
+        "SURVEY",
+        "PLANLOCK",
+        "BUILD",
+        "RUNNER",
+        "TARGET",
+        "RIVAL",
+        "SEAL",
+        "RECEIPT"
+      ]
+    },
+    "completedWork": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "remainingWork": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "filesChanged": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "commandsRun": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "command",
+          "status"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "command": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "passed",
+              "failed",
+              "skipped"
+            ]
+          },
+          "evidence": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "reviews": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "budget": {
+      "$ref": "engineering-task.schema.json#/$defs/budget"
+    },
+    "budgetConsumption": {
+      "type": "object",
+      "required": [
+        "tokensUsed",
+        "runtimeMinutes",
+        "reviewRounds",
+        "recursionDepth"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "tokensUsed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "runtimeMinutes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reviewRounds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "recursionDepth": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "scopeViolations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 0
+    },
+    "rollbackCheckpoint": {
+      "type": "string",
+      "minLength": 1
+    },
+    "handoffState": {
+      "type": "string",
+      "minLength": 1
+    },
+    "receiptStatus": {
+      "enum": [
+        "not_emitted",
+        "draft",
+        "emitted"
+      ]
+    }
+  }
+}

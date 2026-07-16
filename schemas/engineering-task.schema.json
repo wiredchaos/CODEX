@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wiredchaos.dev/schemas/agentic-engineering/engineering-task.schema.json",
+  "title": "Engineering Task",
+  "description": "Mandate for a bounded CHAOS CODE Agentic Engineering Guild task.",
+  "type": "object",
+  "required": [
+    "taskId",
+    "repository",
+    "priority",
+    "riskTier",
+    "district",
+    "requiredSkills",
+    "acceptanceCriteria",
+    "budget",
+    "permissions",
+    "humanApproval",
+    "nonGoals",
+    "stopConditions"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "taskId": {
+      "type": "string",
+      "pattern": "^TASK-[0-9]+$"
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^[^/]+/[^/]+$"
+    },
+    "priority": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "riskTier": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "district": {
+      "const": "chaos-code"
+    },
+    "requiredSkills": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "ROUTER",
+          "SHIFT",
+          "SURVEY",
+          "PLANLOCK",
+          "RUNNER",
+          "TARGET",
+          "RIVAL",
+          "SEAL"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "acceptanceCriteria": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "budget": {
+      "$ref": "#/$defs/budget"
+    },
+    "permissions": {
+      "$ref": "#/$defs/permissions"
+    },
+    "humanApproval": {
+      "type": "object",
+      "required": [
+        "requiredFor"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "requiredFor": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "nonGoals": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "stopConditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "budget": {
+      "type": "object",
+      "required": [
+        "maxTokens",
+        "maxRuntimeMinutes",
+        "maxReviewRounds",
+        "maxRecursionDepth"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "maxTokens": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxRuntimeMinutes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxReviewRounds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maxRecursionDepth": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "required": [
+        "writePaths",
+        "forbiddenPaths",
+        "allowedTools"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "writePaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "forbiddenPaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowedTools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

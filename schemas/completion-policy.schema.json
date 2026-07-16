@@ -1,0 +1,1014 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wiredchaos.dev/schemas/agentic-engineering/completion-policy.schema.json",
+  "title": "Completion Policy",
+  "description": "Fail-closed Phase One SEAL gates.",
+  "type": "object",
+  "required": [
+    "policyId",
+    "gates"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "policyId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gates": {
+      "type": "object",
+      "required": [
+        "repository_surveyed",
+        "plan_locked",
+        "scope_respected",
+        "application_started",
+        "intended_behavior_observed",
+        "targeted_tests_passed",
+        "negative_case_tested",
+        "full_suite_status_recorded",
+        "security_review_status_recorded",
+        "documentation_checked",
+        "unresolved_risks_disclosed",
+        "rollback_available",
+        "receipt_emitted"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "repository_surveyed": {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "skipped",
+                "not_applicable"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "evidenceReferences": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "skipped"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "not_applicable"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          ]
+        },
+        "plan_locked": {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "skipped",
+                "not_applicable"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "evidenceReferences": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "skipped"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "not_applicable"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          ]
+        },
+        "scope_respected": {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "skipped",
+                "not_applicable"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "evidenceReferences": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "skipped"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "not_applicable"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          ]
+        },
+        "application_started": {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "skipped",
+                "not_applicable"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "evidenceReferences": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "skipped"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "not_applicable"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          ]
+        },
+        "intended_behavior_observed": {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "skipped",
+                "not_applicable"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "evidenceReferences": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "skipped"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "not_applicable"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          ]
+        },
+        "targeted_tests_passed": {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "skipped",
+                "not_applicable"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "evidenceReferences": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "skipped"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "not_applicable"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          ]
+        },
+        "negative_case_tested": {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "skipped",
+                "not_applicable"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "evidenceReferences": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "skipped"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "not_applicable"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          ]
+        },
+        "full_suite_status_recorded": {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "skipped",
+                "not_applicable"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "evidenceReferences": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "skipped"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "not_applicable"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          ]
+        },
+        "security_review_status_recorded": {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "skipped",
+                "not_applicable"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "evidenceReferences": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "skipped"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "not_applicable"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          ]
+        },
+        "documentation_checked": {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "skipped",
+                "not_applicable"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "evidenceReferences": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "skipped"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "not_applicable"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          ]
+        },
+        "unresolved_risks_disclosed": {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "skipped",
+                "not_applicable"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "evidenceReferences": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "skipped"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "not_applicable"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          ]
+        },
+        "rollback_available": {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "skipped",
+                "not_applicable"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "evidenceReferences": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "skipped"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "not_applicable"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          ]
+        },
+        "receipt_emitted": {
+          "type": "object",
+          "required": [
+            "status"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "passed",
+                "failed",
+                "skipped",
+                "not_applicable"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "evidenceReferences": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "skipped"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            },
+            {
+              "if": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "not_applicable"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "then": {
+                "type": "object",
+                "properties": {
+                  "reason": {}
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

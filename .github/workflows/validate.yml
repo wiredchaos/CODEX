@@ -1,0 +1,35 @@
+name: Validate governed manifests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile=false
+      - name: Run governance tests
+        run: pnpm test:governance
+      - name: Validate import plans
+        run: pnpm validate:imports
+      - name: Validate deployment receipts
+        run: pnpm validate:receipts
+      - name: Validate Agentic Engineering Guild
+        run: pnpm validate:agentic-engineering

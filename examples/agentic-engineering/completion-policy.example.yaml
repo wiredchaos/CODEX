@@ -1,0 +1,81 @@
+{
+  "policyId": "phase-one-example",
+  "gates": {
+    "repository_surveyed": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "plan_locked": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "scope_respected": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "application_started": {
+      "status": "not_applicable",
+      "reason": "Documentation-only validator corridor has no service runtime."
+    },
+    "intended_behavior_observed": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "targeted_tests_passed": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "negative_case_tested": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "full_suite_status_recorded": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "security_review_status_recorded": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "documentation_checked": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "unresolved_risks_disclosed": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "rollback_available": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "receipt_emitted": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    }
+  }
+}

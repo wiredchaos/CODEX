@@ -1,0 +1,256 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wiredchaos.dev/schemas/agentic-engineering/engineering-receipt.schema.json",
+  "title": "Engineering Receipt",
+  "type": "object",
+  "required": [
+    "task",
+    "shift",
+    "mandate",
+    "executionOwner",
+    "agentRuntime",
+    "model",
+    "skillVersions",
+    "repository",
+    "branch",
+    "sourceCommit",
+    "filesChanged",
+    "commandsExecuted",
+    "tests",
+    "proofOfBehavior",
+    "reviewFindings",
+    "findingDispositions",
+    "completionGates",
+    "unresolvedRisks",
+    "rollbackStrategy",
+    "humanApprovals",
+    "finalStatus",
+    "timestamps"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "task": {
+      "type": "object",
+      "required": [
+        "taskId",
+        "riskTier"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "taskId": {
+          "type": "string"
+        },
+        "riskTier": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        }
+      }
+    },
+    "shift": {
+      "type": "string"
+    },
+    "mandate": {
+      "type": "string"
+    },
+    "executionOwner": {
+      "type": "string"
+    },
+    "agentRuntime": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "skillVersions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "repository": {
+      "type": "string"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "sourceCommit": {
+      "type": "string",
+      "minLength": 7
+    },
+    "filesChanged": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "commandsExecuted": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "taxonomy",
+          "status"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "taxonomy": {
+            "enum": [
+              "unit",
+              "integration",
+              "e2e",
+              "governance",
+              "security",
+              "manual_observation"
+            ]
+          },
+          "status": {
+            "enum": [
+              "passed",
+              "failed",
+              "skipped"
+            ]
+          }
+        }
+      }
+    },
+    "proofOfBehavior": {
+      "$ref": "proof-of-behavior.schema.json"
+    },
+    "reviewFindings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "findingDispositions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "finding",
+          "disposition"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "finding": {
+            "type": "string"
+          },
+          "disposition": {
+            "enum": [
+              "fixed",
+              "accepted_risk",
+              "deferred_with_issue",
+              "rejected_with_reason",
+              "requires_human_decision"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "completionGates": {
+      "$ref": "completion-policy.schema.json#/properties/gates"
+    },
+    "unresolvedRisks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "rollbackStrategy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "humanApprovals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "approver",
+          "evidence"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "approver": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "finalStatus": {
+      "enum": [
+        "sealed",
+        "failed",
+        "blocked"
+      ]
+    },
+    "timestamps": {
+      "type": "object",
+      "required": [
+        "startedAt",
+        "completedAt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "startedAt": {
+          "type": "string"
+        },
+        "completedAt": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "type": "object",
+            "properties": {
+              "riskTier": {
+                "const": "critical"
+              }
+            },
+            "required": [
+              "riskTier"
+            ]
+          }
+        },
+        "required": [
+          "task"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "humanApprovals": {
+            "type": "array",
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ]
+}

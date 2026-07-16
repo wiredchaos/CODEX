@@ -2,9 +2,73 @@
 
 WIRED CHAOS WORKFLOW PUBLISH CODEX
 
+## WIRED 🧠 CHAOS META (Project NEURO META X | NMX 🧠)
+WIRED 🧠 CHAOS META (Project NEURO META X | NMX 🧠) is a next-generation agentic AI architecture built for autonomous orchestration, swarm intelligence, and high-assurance decision systems.
+
+NMX integrates multi-agent coordination, threat modeling, entropy control, and structured governance into a unified operating layer. It is designed for builders, founders, researchers, and infrastructure teams who need AI systems that think in constraints, not chaos.
+
+Unlike single-model assistants, NEURO META X operates as a structured swarm. Inputs pass through a quarantine membrane. Advisory agents analyze risk, capital, sovereignty, and utility. Executive layers enforce survival thresholds and generate audit-ready receipts. Every action is logged. Every decision is scoped. No raw ingestion. No unilateral execution.
+
+Core capabilities include:
+- Agent orchestration and swarm coordination
+- Risk modeling and threat object generation
+- On-chain intelligence analysis (Ethereum, Solana, Base)
+- Governance-aware automation frameworks
+- Structured reporting and decision receipts
+- Thermodynamic entropy management for AI systems
+
+The system is optimized for Ask Engine Optimization (AEO), enabling discovery across ChatGPT, Perplexity, and AI search overviews. NMX publishes structured, schema-aligned outputs that are readable by both humans and machine agents.
+
+Ideal for:
+- Web3 infrastructure teams
+- AI-native startups
+- Governance and compliance systems
+- High-risk data environments
+- Autonomous media and intelligence networks
+
+WIRED CHAOS META transforms AI from a chatbot into an operating system.
+
+NEURO META X is not prompt engineering. It is architectural engineering for intelligence.
+
+## Portfolio Skill Invariant
+This repository enforces a root-level portfolio invariant: every merged build must demonstrate or document evidence for the required skill set.
+
+Required skill set:
+- Claude Code
+- Claude API
+- MCP Servers
+- Agent Orchestration
+- Automation
+- Linux
+- TypeScript
+- Fractal Claude Clusters
+
+Implementation and proof policy:
+- Canonical checklist and proof format: [`PORTFOLIO.md`](PORTFOLIO.md)
+- Pull request enforcement template: [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md)
+
+PRs missing skill proof may be closed without review.
+
 ## Structure
 - `README.md`: Brief label for the repository and quick pointers.
 - `DIAGNOSTIC.md`: Current snapshot of repository layout, status, and recommended next steps.
+- `docs/AGENTIC_UI_INGESTION_PIPELINE.md`: Agentic UI ingestion pipeline and Transmission Frame compiler spec.
+- `docs/COPAW_CONTRIBUTION_PLAYBOOK.md`: Step-by-step guide for contributing WIRED CHAOS-aligned updates to the CoPaw OSS repository.
+
+## Canonical architecture (WIRED CHAOS META)
+The canonical architecture baseline is formalized in `/doc` and serves as the non-runtime authority for policy boundaries, trust handling, ingress constraints, and execution contracts.
+
+- `doc/ROOT_LAW.md`: Non-negotiable architectural constraints and compliance gate.
+- `doc/ARCHITECTURE_PLANES.md`: Canonical separation of concerns across the six architecture planes.
+- `doc/IMMUNE_LAYER_SPEC.md`: Deterministic trust posture and quarantine/deny semantics.
+- `doc/DFC_CORE_SERVICE_SPEC.md`: Deterministic flow control and execution directive model.
+- `doc/BRAND_ORIENTATION_LAYER_SPEC.md`: Experience posture mapping without policy mutation.
+- `doc/INGRESS_MEMBRANE_SPEC.md`: Boundary normalization and reject-first ingress contract.
+- `doc/EXECUTION_FABRIC_SPEC.md`: Authorized side-effect execution and receipt guarantees.
+- `docs/OBSCURA_BROWSER_EXECUTION_ADAPTER.md`: Approved pilot documentation for Obscura-first routing on governed low-risk public-web workloads, with Playwright + Chromium fallback, stealth disabled by default, SSRF/private-network blocking, human approval for consequential actions, and production promotion gated by benchmark, security, licensing, and compatibility reviews.
+
+These artifacts are specification-only and do not introduce runtime behavior.
+
 ## Copilot prompt
 See [COPILOT_PROMPT.md](COPILOT_PROMPT.md) for the recommended Copilot Chat prompt to synchronize on the WIRED CHAOS organization.
 
@@ -65,3 +129,33 @@ CODEX operates as the truth layer holding manifests, contracts, and state. WIRED
 - If your network blocks the default registry, pin npm to the public registry before installing: `npm config set registry https://registry.npmjs.org/`.
 - The repo includes a checked-in `.npmrc` with the same registry pin to keep installs consistent across environments.
 - If you need to consume scoped packages hosted on GitHub Packages, authenticate with your scope before installing: `npm login --scope=@yourScope --registry=https://npm.pkg.github.com`.
+- For Three.js playground reference work, clone the upstream sandbox locally: `git clone https://github.com/pinkforest/threejs-playground.git`.
+
+## AGENTROPOLIS-54T governance baseline
+
+AGENTROPOLIS-54T is the defense, governance, policy-contract, verification, and receipt layer for AGENTROPOLIS-aligned systems. This repository section is doctrine and validation baseline only; it does not claim a live runtime policy engine, cryptographic signing service, immutable receipt store, wallet executor, or identity verifier.
+
+Federation roles are evidence-scoped:
+
+- `wiredchaos/agentropolis` is treated as the canonical Root City OS and source of city doctrine.
+- `wiredchaos/AGENTROPOLIS-54T` is the defense, governance, policy-contract, verification, and receipt layer.
+- `wiredchaos/AGENTROPOLIS-AGENT-MCP` is the governed MCP/tool integration kit.
+- HERMES-related repositories may provide runtime, dispatch, operator, or public application surfaces depending on each repository's own documentation.
+
+Core 54T artifacts:
+
+- [54T policy contract](policies/54t-policy.yaml)
+- [Receipt schema](schemas/receipt.schema.json)
+- [Policy gates](docs/POLICY-GATES.md)
+- [Dual consent doctrine](docs/DUAL-CONSENT.md)
+- [Prompt-injection doctrine](docs/PROMPT-INJECTION.md)
+- [Threat model](docs/THREAT-MODEL.md)
+- [Policy change governance](docs/POLICY-CHANGE-GOVERNANCE.md)
+- [Live vs planned status](docs/LIVE-VS-PLANNED.md)
+- [Manual tests](tests/README.md)
+
+Validate the baseline with:
+
+```bash
+python scripts/validate.py
+```

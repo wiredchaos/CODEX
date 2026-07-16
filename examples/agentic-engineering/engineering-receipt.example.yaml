@@ -1,0 +1,137 @@
+{
+  "task": {
+    "taskId": "TASK-882",
+    "riskTier": "medium"
+  },
+  "shift": "SHIFT-TASK-882",
+  "mandate": "Complete Phase One validator documentation corridor.",
+  "executionOwner": "codex-agent",
+  "agentRuntime": "Codex CLI",
+  "model": "GPT-5.5",
+  "skillVersions": {
+    "ROUTER": "1.0.0",
+    "SHIFT": "1.0.0",
+    "SURVEY": "1.0.0",
+    "PLANLOCK": "1.0.0",
+    "RUNNER": "1.0.0",
+    "TARGET": "1.0.0",
+    "RIVAL": "1.0.0",
+    "SEAL": "1.0.0"
+  },
+  "repository": "wiredchaos/example",
+  "branch": "feature/chaos-code-agentic-engineering-guild",
+  "sourceCommit": "0000000",
+  "filesChanged": [
+    "schemas/engineering-task.schema.json"
+  ],
+  "commandsExecuted": [
+    "pnpm validate:agentic-engineering"
+  ],
+  "tests": [
+    {
+      "name": "agentic validator",
+      "taxonomy": "governance",
+      "status": "passed"
+    }
+  ],
+  "proofOfBehavior": {
+    "intendedBehavior": "Agentic engineering validator enforces Phase One contracts.",
+    "observation": "Validator compiled schemas and rejected negative fixtures.",
+    "environment": "local Node test runner",
+    "provingTest": "pnpm validate:agentic-engineering",
+    "negativeCase": "Receipt with critical risk and no approval is rejected.",
+    "failureSignal": "AJV validation error or custom validator failure",
+    "unresolvedUncertainty": [],
+    "evidenceReferences": [
+      "infrastructure/tests/agentic-engineering.test.mjs"
+    ]
+  },
+  "reviewFindings": [],
+  "findingDispositions": [],
+  "completionGates": {
+    "repository_surveyed": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "plan_locked": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "scope_respected": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "application_started": {
+      "status": "not_applicable",
+      "reason": "Documentation-only validator corridor has no service runtime."
+    },
+    "intended_behavior_observed": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "targeted_tests_passed": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "negative_case_tested": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "full_suite_status_recorded": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "security_review_status_recorded": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "documentation_checked": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "unresolved_risks_disclosed": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "rollback_available": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    },
+    "receipt_emitted": {
+      "status": "passed",
+      "evidenceReferences": [
+        "example evidence"
+      ]
+    }
+  },
+  "unresolvedRisks": [],
+  "rollbackStrategy": "git revert the Phase One commits",
+  "humanApprovals": [],
+  "finalStatus": "sealed",
+  "timestamps": {
+    "startedAt": "2026-07-12T00:00:00Z",
+    "completedAt": "2026-07-12T00:00:00Z"
+  }
+}

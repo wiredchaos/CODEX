@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wiredchaos.dev/schemas/agentic-engineering/proof-of-behavior.schema.json",
+  "title": "Proof of Behavior",
+  "description": "Observed evidence that intended behavior was exercised, including negative case.",
+  "type": "object",
+  "required": [
+    "intendedBehavior",
+    "observation",
+    "environment",
+    "provingTest",
+    "negativeCase",
+    "failureSignal",
+    "unresolvedUncertainty",
+    "evidenceReferences"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "intendedBehavior": {
+      "type": "string",
+      "minLength": 1
+    },
+    "observation": {
+      "type": "string",
+      "minLength": 1
+    },
+    "environment": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provingTest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "negativeCase": {
+      "type": "string",
+      "minLength": 1
+    },
+    "failureSignal": {
+      "type": "string",
+      "minLength": 1
+    },
+    "unresolvedUncertainty": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidenceReferences": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    }
+  }
+}

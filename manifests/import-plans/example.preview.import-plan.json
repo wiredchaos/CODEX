@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "1.0.0",
+  "target": "example-preview-worker",
+  "sourceRepository": "wiredchaos/example-app",
+  "runtime": "cloudflare-pages",
+  "notes": "Example import plan; not a production identifier."
+}
